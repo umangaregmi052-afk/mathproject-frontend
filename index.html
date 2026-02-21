@@ -116,6 +116,15 @@
   .form-select option { background: var(--surface); }
   .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
 
+  .group-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 12px 10px 5px;
+    opacity: 0.6;
+  }
   .type-radio { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--muted); font-size: 0.9rem; transition: all 0.15s; cursor: pointer; }
   .type-radio:hover { border-color: var(--text); color: var(--text); }
   .type-radio.active { border-color: var(--accent); color: var(--accent); background: rgba(240,192,64,0.07); }
@@ -159,14 +168,74 @@
     <button class="nav-item active" id="topicBtn-all" onclick="setTopic('all',this)">
       <span class="nav-dot dot-all"></span> All Topics <span class="nav-count" id="cnt-all">0</span>
     </button>
+
+    <div class="group-label">Limits & Derivatives</div>
     <button class="nav-item" id="topicBtn-limits" onclick="setTopic('limits',this)">
-      <span class="nav-dot dot-lim"></span> Limits & Derivatives <span class="nav-count" id="cnt-limits">0</span>
+      <span class="nav-dot dot-lim"></span> Limits <span class="nav-count" id="cnt-limits">0</span>
     </button>
-    <button class="nav-item" id="topicBtn-integration" onclick="setTopic('integration',this)">
-      <span class="nav-dot dot-int"></span> Integration <span class="nav-count" id="cnt-integration">0</span>
+    <button class="nav-item" id="topicBtn-higher_derivatives" onclick="setTopic('higher_derivatives',this)">
+      <span class="nav-dot dot-lim"></span> Higher Order Derivatives <span class="nav-count" id="cnt-higher_derivatives">0</span>
     </button>
-    <button class="nav-item" id="topicBtn-ode" onclick="setTopic('ode',this)">
-      <span class="nav-dot dot-ode"></span> Differential Equations <span class="nav-count" id="cnt-ode">0</span>
+    <button class="nav-item" id="topicBtn-asymptotes" onclick="setTopic('asymptotes',this)">
+      <span class="nav-dot dot-lim"></span> Asymptotes <span class="nav-count" id="cnt-asymptotes">0</span>
+    </button>
+    <button class="nav-item" id="topicBtn-pedal_equation" onclick="setTopic('pedal_equation',this)">
+      <span class="nav-dot dot-lim"></span> Pedal Equation <span class="nav-count" id="cnt-pedal_equation">0</span>
+    </button>
+    <button class="nav-item" id="topicBtn-radius_curvature" onclick="setTopic('radius_curvature',this)">
+      <span class="nav-dot dot-lim"></span> Radius of Curvature <span class="nav-count" id="cnt-radius_curvature">0</span>
+    </button>
+
+    <div class="group-label">Integration</div>
+    <button class="nav-item" id="topicBtn-methods_integration" onclick="setTopic('methods_integration',this)">
+      <span class="nav-dot dot-int"></span> Methods of Integration <span class="nav-count" id="cnt-methods_integration">0</span>
+    </button>
+    <button class="nav-item" id="topicBtn-definite_integral" onclick="setTopic('definite_integral',this)">
+      <span class="nav-dot dot-int"></span> Definite Integral <span class="nav-count" id="cnt-definite_integral">0</span>
+    </button>
+    <button class="nav-item" id="topicBtn-diff_integral_sign" onclick="setTopic('diff_integral_sign',this)">
+      <span class="nav-dot dot-int"></span> Diff. Under Integral Sign <span class="nav-count" id="cnt-diff_integral_sign">0</span>
+    </button>
+    <button class="nav-item" id="topicBtn-improper_integral" onclick="setTopic('improper_integral',this)">
+      <span class="nav-dot dot-int"></span> Improper Integral <span class="nav-count" id="cnt-improper_integral">0</span>
+    </button>
+    <button class="nav-item" id="topicBtn-beta_gamma" onclick="setTopic('beta_gamma',this)">
+      <span class="nav-dot dot-int"></span> Beta & Gamma Function <span class="nav-count" id="cnt-beta_gamma">0</span>
+    </button>
+    <button class="nav-item" id="topicBtn-area_curve" onclick="setTopic('area_curve',this)">
+      <span class="nav-dot dot-int"></span> Area Under Curve <span class="nav-count" id="cnt-area_curve">0</span>
+    </button>
+    <button class="nav-item" id="topicBtn-arc_length" onclick="setTopic('arc_length',this)">
+      <span class="nav-dot dot-int"></span> Arc Length <span class="nav-count" id="cnt-arc_length">0</span>
+    </button>
+    <button class="nav-item" id="topicBtn-surface_revolution" onclick="setTopic('surface_revolution',this)">
+      <span class="nav-dot dot-int"></span> Surface of Revolution <span class="nav-count" id="cnt-surface_revolution">0</span>
+    </button>
+    <button class="nav-item" id="topicBtn-volume_revolution" onclick="setTopic('volume_revolution',this)">
+      <span class="nav-dot dot-int"></span> Volume of Revolution <span class="nav-count" id="cnt-volume_revolution">0</span>
+    </button>
+    <button class="nav-item" id="topicBtn-centroid_inertia" onclick="setTopic('centroid_inertia',this)">
+      <span class="nav-dot dot-int"></span> Centroid & Moment of Inertia <span class="nav-count" id="cnt-centroid_inertia">0</span>
+    </button>
+
+    <div class="group-label">Differential Equations</div>
+    <button class="nav-item" id="topicBtn-homogeneous_ode" onclick="setTopic('homogeneous_ode',this)">
+      <span class="nav-dot dot-ode"></span> Homogeneous ODE <span class="nav-count" id="cnt-homogeneous_ode">0</span>
+    </button>
+    <button class="nav-item" id="topicBtn-bernoulli" onclick="setTopic('bernoulli',this)">
+      <span class="nav-dot dot-ode"></span> Bernoulli's Equation <span class="nav-count" id="cnt-bernoulli">0</span>
+    </button>
+    <button class="nav-item" id="topicBtn-first_higher_ode" onclick="setTopic('first_higher_ode',this)">
+      <span class="nav-dot dot-ode"></span> First & Higher Order ODE <span class="nav-count" id="cnt-first_higher_ode">0</span>
+    </button>
+    <button class="nav-item" id="topicBtn-second_order_linear" onclick="setTopic('second_order_linear',this)">
+      <span class="nav-dot dot-ode"></span> Second Order Linear ODE <span class="nav-count" id="cnt-second_order_linear">0</span>
+    </button>
+    <button class="nav-item" id="topicBtn-second_nonhomogeneous" onclick="setTopic('second_nonhomogeneous',this)">
+      <span class="nav-dot dot-ode"></span> Second Order Non-Homogeneous <span class="nav-count" id="cnt-second_nonhomogeneous">0</span>
+    </button>
+    <button class="nav-item" id="topicBtn-application_ode" onclick="setTopic('application_ode',this)">
+      <span class="nav-dot dot-ode"></span> Application of 2nd Order ODE <span class="nav-count" id="cnt-application_ode">0</span>
     </button>
 
     <hr class="divider" />
@@ -235,9 +304,33 @@
     <div class="form-group">
       <label class="form-label">Topic</label>
       <select class="form-select" id="newTopic">
-        <option value="limits">Limits & Derivatives</option>
-        <option value="integration">Integration</option>
-        <option value="ode">Differential Equations</option>
+        <optgroup label="── Limits & Derivatives ──">
+          <option value="limits">Limits</option>
+          <option value="higher_derivatives">Higher Order Derivatives</option>
+          <option value="asymptotes">Asymptotes</option>
+          <option value="pedal_equation">Pedal Equation</option>
+          <option value="radius_curvature">Radius of Curvature</option>
+        </optgroup>
+        <optgroup label="── Integration ──">
+          <option value="methods_integration">Methods of Integration</option>
+          <option value="definite_integral">Review of Definite Integral</option>
+          <option value="diff_integral_sign">Differentiation Under Integral Sign</option>
+          <option value="improper_integral">Improper Integral</option>
+          <option value="beta_gamma">Beta & Gamma Function</option>
+          <option value="area_curve">Area Under Curve</option>
+          <option value="arc_length">Arc Length</option>
+          <option value="surface_revolution">Area of Surface of Revolution</option>
+          <option value="volume_revolution">Volume of Solid of Revolution</option>
+          <option value="centroid_inertia">Centroid & Moment of Inertia</option>
+        </optgroup>
+        <optgroup label="── Differential Equations ──">
+          <option value="homogeneous_ode">Homogeneous Differential Equation</option>
+          <option value="bernoulli">Bernoulli's Equation</option>
+          <option value="first_higher_ode">First Order & Higher Order ODE</option>
+          <option value="second_order_linear">Second Order Linear ODE</option>
+          <option value="second_nonhomogeneous">Second Order Non-Homogeneous ODE</option>
+          <option value="application_ode">Application of Second Order ODE</option>
+        </optgroup>
       </select>
     </div>
     <div class="form-group">
@@ -292,9 +385,33 @@ let selectedType = 'exercise';
 let searchTimeout = null;
 
 const TOPICS = {
-  limits:      { label: 'Limits & Derivatives', cls: 'badge-lim' },
-  integration: { label: 'Integration',          cls: 'badge-int' },
-  ode:         { label: 'Differential Equations', cls: 'badge-ode' },
+  limits:                { label: 'Limits', cls: 'badge-lim', group: 'derivatives' },
+  higher_derivatives:    { label: 'Higher Order Derivatives', cls: 'badge-lim', group: 'derivatives' },
+  asymptotes:            { label: 'Asymptotes', cls: 'badge-lim', group: 'derivatives' },
+  pedal_equation:        { label: 'Pedal Equation', cls: 'badge-lim', group: 'derivatives' },
+  radius_curvature:      { label: 'Radius of Curvature', cls: 'badge-lim', group: 'derivatives' },
+  methods_integration:   { label: 'Methods of Integration', cls: 'badge-int', group: 'integration' },
+  definite_integral:     { label: 'Review of Definite Integral', cls: 'badge-int', group: 'integration' },
+  diff_integral_sign:    { label: 'Differentiation Under Integral Sign', cls: 'badge-int', group: 'integration' },
+  improper_integral:     { label: 'Improper Integral', cls: 'badge-int', group: 'integration' },
+  beta_gamma:            { label: 'Beta & Gamma Function', cls: 'badge-int', group: 'integration' },
+  area_curve:            { label: 'Area Under Curve', cls: 'badge-int', group: 'integration' },
+  arc_length:            { label: 'Arc Length', cls: 'badge-int', group: 'integration' },
+  surface_revolution:    { label: 'Area of Surface of Revolution', cls: 'badge-int', group: 'integration' },
+  volume_revolution:     { label: 'Volume of Solid of Revolution', cls: 'badge-int', group: 'integration' },
+  centroid_inertia:      { label: 'Centroid & Moment of Inertia', cls: 'badge-int', group: 'integration' },
+  homogeneous_ode:       { label: 'Homogeneous Differential Equation', cls: 'badge-ode', group: 'ode' },
+  bernoulli:             { label: "Bernoulli's Equation", cls: 'badge-ode', group: 'ode' },
+  first_higher_ode:      { label: 'First Order & Higher Order ODE', cls: 'badge-ode', group: 'ode' },
+  second_order_linear:   { label: 'Second Order Linear ODE', cls: 'badge-ode', group: 'ode' },
+  second_nonhomogeneous: { label: 'Second Order Non-Homogeneous ODE', cls: 'badge-ode', group: 'ode' },
+  application_ode:       { label: 'Application of Second Order ODE', cls: 'badge-ode', group: 'ode' },
+};
+
+const GROUPS = {
+  derivatives:  { label: 'Limits & Derivatives', dot: 'dot-lim' },
+  integration:  { label: 'Integration', dot: 'dot-int' },
+  ode:          { label: 'Differential Equations', dot: 'dot-ode' },
 };
 
 // ── TOAST ──────────────────────────────────────────────
@@ -316,6 +433,16 @@ async function apiFetch(path, opts = {}) {
 }
 
 // ── CONNECTION CHECK ───────────────────────────────────
+async function loadTopicCounts() {
+  try {
+    const all = await apiFetch('/api/questions');
+    Object.keys(TOPICS).forEach(key => {
+      const el = document.getElementById('cnt-' + key);
+      if (el) el.textContent = all.filter(q => q.topic === key).length;
+    });
+  } catch {}
+}
+
 async function checkConnection() {
   try {
     await apiFetch('/health');
@@ -341,9 +468,8 @@ async function loadStats() {
     document.getElementById('statPct').textContent = pct + '% complete';
     document.getElementById('progressFill').style.width = pct + '%';
     document.getElementById('cnt-all').textContent = total;
-    document.getElementById('cnt-limits').textContent = parseInt(s.limits);
-    document.getElementById('cnt-integration').textContent = parseInt(s.integration);
-    document.getElementById('cnt-ode').textContent = parseInt(s.ode);
+    // Update individual topic counts from questions list
+    loadTopicCounts();
   } catch {}
 }
 
