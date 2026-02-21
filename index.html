@@ -136,6 +136,20 @@
   .view-question { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 0.93rem; line-height: 1.75; color: var(--text); white-space: pre-wrap; }
   .view-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
   .solution-box { background: var(--bg); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 0.87rem; line-height: 1.8; color: var(--text); white-space: pre-wrap; }
+
+  /* ── AI-Refined Solution Styles ── */
+  .ai-solution { font-family: 'IBM Plex Sans', sans-serif; font-size: 0.9rem; line-height: 1.8; color: var(--text); }
+  .sol-section { margin-bottom: 18px; }
+  .sol-section-title { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid rgba(240,192,64,0.2); }
+  .sol-step { display: flex; gap: 14px; margin-bottom: 14px; background: var(--surface2); border-radius: 8px; padding: 12px 14px; border: 1px solid var(--border); align-items: flex-start; }
+  .step-num { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; font-weight: 600; color: var(--accent); background: rgba(240,192,64,0.1); border: 1px solid rgba(240,192,64,0.3); border-radius: 5px; padding: 2px 8px; white-space: nowrap; margin-top: 2px; flex-shrink: 0; }
+  .sol-step > span:last-child, .sol-step > div:last-child { flex: 1; }
+  .sol-result { background: rgba(80,200,120,0.08); border: 1px solid rgba(80,200,120,0.3); border-left: 3px solid var(--accent3); border-radius: 8px; padding: 14px 18px; margin-top: 16px; font-weight: 600; }
+  .sol-result::before { content: '✓ Final Answer'; display: block; font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent3); margin-bottom: 6px; }
+  .sol-note { background: rgba(91,138,240,0.07); border: 1px solid rgba(91,138,240,0.2); border-radius: 6px; padding: 10px 14px; margin: 8px 0; font-size: 0.83rem; color: var(--muted); font-style: italic; }
+  .sol-note::before { content: '💡 '; }
+  code.math { font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; background: rgba(240,192,64,0.08); color: var(--accent); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(240,192,64,0.15); }
+  .ai-badge { display: inline-flex; align-items: center; gap: 5px; font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; color: var(--muted); border: 1px solid var(--border); border-radius: 999px; padding: 2px 9px; margin-bottom: 14px; }
   .no-solution { background: var(--bg); border: 1px dashed var(--border); border-radius: 8px; padding: 20px; font-size: 0.85rem; color: var(--muted); font-style: italic; text-align: center; }
   .notes-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
   .notes-area { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 12px 14px; border-radius: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 0.83rem; outline: none; min-height: 70px; resize: vertical; transition: border 0.15s; line-height: 1.6; }
@@ -693,7 +707,9 @@ async function openViewModal(id) {
         </div>
         <div id="solutionDisplay">
           ${q.solution
-            ? `<div class="solution-box">${escHtml(q.solution)}</div>`
+            ? (q.solution.includes('<div') || q.solution.includes('<span')
+                ? `<div class="solution-box" style="white-space:normal;font-family:inherit"><div class="ai-badge">🤖 Wolfram + Grok AI · Step-by-step</div>${q.solution}</div>`
+                : `<div class="solution-box">${escHtml(q.solution)}</div>`)
             : `<div class="no-solution">No solution yet — click Edit to add one.</div>`}
         </div>
         <div id="solutionEditor" style="display:none">
@@ -780,37 +796,47 @@ document.querySelectorAll('.modal-overlay').forEach(o => {
   o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
 });
 
-// ── WOLFRAM ALPHA SOLVER ───────────────────────────────
+// ── WOLFRAM + GROK SOLVER ─────────────────────────────
+function renderSolution(solution, isHtml) {
+  if (isHtml && solution.includes('<')) {
+    return `<div class="solution-box" style="white-space:normal;font-family:inherit">
+      <div class="ai-badge">🤖 Wolfram + Grok AI · Step-by-step</div>
+      ${solution}
+    </div>`;
+  }
+  return `<div class="solution-box">${escHtml(solution)}</div>`;
+}
+
 async function solveWithWolfram() {
   if (!currentQId) return;
   const btn = document.getElementById('wolframBtn');
   btn.disabled = true;
-  btn.textContent = '⏳ Solving...';
+  btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>Solving...</span>';
+  if (!document.getElementById('spinStyle')) {
+    const s = document.createElement('style');
+    s.id = 'spinStyle';
+    s.textContent = '@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }';
+    document.head.appendChild(s);
+  }
   try {
     const result = await apiFetch('/api/wolfram-solve/' + currentQId, { method: 'POST' });
-    // Update the solution display in the modal
     const display = document.getElementById('solutionDisplay');
     if (display) {
-      display.innerHTML = `<div class="solution-box">${escHtml(result.solution)}</div>`;
+      display.innerHTML = renderSolution(result.solution, result.isHtml);
       display.style.display = 'block';
     }
-    // Hide editor if open
     const editor = document.getElementById('solutionEditor');
     if (editor) editor.style.display = 'none';
-    // Update textarea too
     const input = document.getElementById('solutionInput');
     if (input) input.value = result.solution;
-    // Update solve button
     const solveBtn = document.getElementById('solveBtn');
-    if (solveBtn) {
-      solveBtn.textContent = 'Mark Unsolved';
-      solveBtn.className = 'btn btn-sm btn-ghost';
-    }
+    if (solveBtn) { solveBtn.textContent = 'Mark Unsolved'; solveBtn.className = 'btn btn-sm btn-ghost'; }
     loadStats();
-    toast('✓ Wolfram solved & saved!', 'success');
+    toast('✓ Solved & refined by Grok!', 'success');
   } catch (err) {
-    const msg = err.message || 'Wolfram Alpha could not solve this.';
-    toast('⚠ ' + (msg.length > 80 ? msg.slice(0, 80) + '…' : msg), 'error');
+    let msg = err.message || 'Could not solve this question.';
+    try { const p = JSON.parse(msg); msg = p.error || msg; } catch {}
+    toast('⚠ ' + (msg.length > 90 ? msg.slice(0, 90) + '…' : msg), 'error');
   } finally {
     btn.disabled = false;
     btn.textContent = '🧮 Solve with Wolfram';
