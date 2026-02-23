@@ -1,851 +1,1364 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MathBank — ENSH 101</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Physics Bank — TU Institute of Engineering</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Instrument+Mono:ital,wght@0,400;0,500;1,400&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0e0f13;
-    --surface: #16181f;
-    --surface2: #1e2029;
-    --border: #2a2d3a;
-    --accent: #f0c040;
-    --accent3: #50c878;
-    --text: #e8e9f0;
-    --muted: #7a7f99;
-    --danger: #e05c5c;
-    --lim: #f0c040;
-    --int: #5b8af0;
-    --ode: #50c878;
-    --example: #c084fc;
-    --exercise: #fb923c;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+/* ══════════════════════════════════════════
+   TOKENS
+══════════════════════════════════════════ */
+:root {
+  --ink:      #000000;
+  --paper:    #ffffff;
+  --off:      #f5f5f5;
+  --rule:     #e0e0e0;
+  --muted:    #888888;
+  --faint:    #cccccc;
+  --sidebar-w: 256px;
+  --topbar-h:  58px;
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'Instrument Sans', sans-serif;
+  --font-mono: 'Instrument Mono', monospace;
+}
 
-  header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 18px 32px; border-bottom: 1px solid var(--border);
-    background: var(--surface); position: sticky; top: 0; z-index: 100;
-  }
-  header h1 { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--accent); }
-  header h1 span { color: var(--muted); font-size: 0.78rem; font-family: 'IBM Plex Mono', monospace; font-weight: 400; display: block; margin-top: 2px; }
-  .online-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent3); margin-right: 6px; animation: blink 2s infinite; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+/* ══════════════════════════════════════════
+   RESET
+══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
 
-  .app { display: flex; flex: 1; height: calc(100vh - 65px); }
-  .sidebar { width: 240px; min-width: 240px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; padding: 20px 12px; }
-  .sidebar-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 10px; padding: 0 6px; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; cursor: pointer; font-size: 0.88rem; color: var(--muted); transition: all 0.15s; border: none; background: none; width: 100%; text-align: left; margin-bottom: 2px; }
-  .nav-item:hover, .nav-item.active { background: var(--surface2); color: var(--text); }
-  .nav-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .dot-all { background: var(--muted); } .dot-lim { background: var(--lim); } .dot-int { background: var(--int); } .dot-ode { background: var(--ode); }
-  .nav-count { margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; background: var(--bg); color: var(--muted); padding: 2px 7px; border-radius: 999px; border: 1px solid var(--border); }
-  .divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
-  .status-btn { padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: var(--muted); border: none; background: none; width: 100%; text-align: left; transition: all 0.15s; margin-bottom: 2px; }
-  .status-btn:hover, .status-btn.active { background: var(--surface2); color: var(--text); }
+/* ══════════════════════════════════════════
+   SCROLLBAR
+══════════════════════════════════════════ */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--off); }
+::-webkit-scrollbar-thumb { background: var(--faint); }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
-  .main { flex: 1; overflow-y: auto; padding: 28px 32px; }
-  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 28px; }
-  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
-  .stat-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
-  .stat-value { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--text); line-height: 1; }
-  .stat-sub { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
-  .progress-bar { height: 4px; background: var(--border); border-radius: 99px; margin-top: 10px; overflow: hidden; }
-  .progress-fill { height: 100%; background: var(--accent3); border-radius: 99px; transition: width 0.4s; }
+/* ══════════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════════ */
+.sidebar {
+  position: fixed; top: 0; left: 0;
+  width: var(--sidebar-w); height: 100vh;
+  background: var(--ink);
+  display: flex; flex-direction: column;
+  z-index: 200;
+  transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+}
+.sidebar.closed { transform: translateX(calc(-1 * var(--sidebar-w))); }
 
-  .topbar { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; }
-  .search-wrap { position: relative; flex: 1; }
-  .search-wrap input { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 10px 14px 10px 38px; border-radius: 8px; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.88rem; outline: none; transition: border 0.15s; }
-  .search-wrap input:focus { border-color: var(--accent); }
-  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+.sidebar-brand {
+  padding: 24px 22px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.sidebar-logo {
+  font-family: var(--font-head);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--paper);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: 5px;
+}
+.sidebar-sub {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
 
-  .btn { padding: 10px 18px; border-radius: 8px; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.88rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; white-space: nowrap; }
-  .btn-primary { background: var(--accent); color: #0e0f13; }
-  .btn-primary:hover { background: #f5d060; }
-  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
-  .btn-ghost:hover { border-color: var(--text); color: var(--text); }
-  .btn-sm { padding: 7px 13px; font-size: 0.8rem; }
-  .btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
-  .btn-danger:hover { background: var(--danger); color: white; }
-  .btn-green { background: var(--accent3); color: #0e0f13; }
-  .btn-green:hover { opacity: 0.85; }
-  .btn-wolfram { background: #d84315; color: #fff; }
-  .btn-wolfram:hover { background: #bf360c; }
-  .btn-wolfram:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 0;
+}
+.nav-label {
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.25);
+  padding: 0 22px;
+  margin-bottom: 8px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 22px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: rgba(255,255,255,0.45);
+  transition: color 0.12s, background 0.12s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  position: relative;
+  letter-spacing: -0.01em;
+}
+.nav-item:hover { color: rgba(255,255,255,0.85); }
+.nav-item.active {
+  color: var(--paper);
+  font-weight: 600;
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%;
+  transform: translateY(-50%);
+  width: 2px; height: 60%;
+  background: var(--paper);
+}
+.nav-index {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: rgba(255,255,255,0.2);
+  width: 18px;
+  flex-shrink: 0;
+}
+.nav-item.active .nav-index { color: rgba(255,255,255,0.4); }
 
-  .questions-list { display: flex; flex-direction: column; gap: 12px; }
-  .q-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; cursor: pointer; transition: border-color 0.15s, background 0.15s; border-left: 3px solid transparent; }
-  .q-card:hover { background: var(--surface2); }
-  .q-card.solved { border-left-color: var(--accent3); }
-  .q-card.unsolved { border-left-color: var(--border); }
-  .q-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-  .topic-badge { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; padding: 3px 9px; border-radius: 999px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
-  .badge-lim { background: rgba(240,192,64,0.12); color: var(--lim); border: 1px solid rgba(240,192,64,0.25); }
-  .badge-int { background: rgba(91,138,240,0.12); color: var(--int); border: 1px solid rgba(91,138,240,0.25); }
-  .badge-ode { background: rgba(80,200,120,0.12); color: var(--ode); border: 1px solid rgba(80,200,120,0.25); }
-  .badge-example { background: rgba(192,132,252,0.12); color: var(--example); border: 1px solid rgba(192,132,252,0.25); }
-  .badge-exercise { background: rgba(251,146,60,0.12); color: var(--exercise); border: 1px solid rgba(251,146,60,0.25); }
-  .q-num { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: var(--muted); }
-  .subtopic-text { font-size: 0.8rem; color: var(--muted); font-style: italic; }
-  .solved-chip { margin-left: auto; font-size: 0.72rem; padding: 3px 9px; border-radius: 999px; }
-  .chip-solved { background: rgba(80,200,120,0.12); color: var(--accent3); }
-  .chip-unsolved { background: rgba(122,127,153,0.08); color: var(--muted); }
-  .q-text { font-size: 0.92rem; color: var(--text); line-height: 1.7; font-family: 'IBM Plex Mono', monospace; }
+.sidebar-footer {
+  padding: 14px 22px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 0.05em;
+}
 
-  .empty-state { text-align: center; padding: 70px 20px; color: var(--muted); }
-  .empty-state .icon { font-size: 3rem; margin-bottom: 16px; }
-  .empty-state h3 { font-size: 1.1rem; margin-bottom: 8px; color: var(--text); }
+/* ══════════════════════════════════════════
+   MAIN LAYOUT
+══════════════════════════════════════════ */
+.main {
+  margin-left: var(--sidebar-w);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.28s cubic-bezier(0.4,0,0.2,1);
+}
+.main.wide { margin-left: 0; }
 
-  /* SKELETON LOADING */
-  .skeleton { background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 10px; }
-  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-  .skeleton-card { height: 90px; margin-bottom: 12px; }
+/* ══════════════════════════════════════════
+   TOPBAR
+══════════════════════════════════════════ */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  height: var(--topbar-h);
+  background: var(--paper);
+  border-bottom: 1px solid var(--ink);
+  display: flex;
+  align-items: center;
+  padding: 0 32px 0 20px;
+  gap: 20px;
+}
 
-  /* MODAL */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
-  .modal-overlay.open { opacity: 1; pointer-events: all; }
-  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px; width: 92%; max-width: 620px; max-height: 90vh; overflow-y: auto; transform: translateY(16px); transition: transform 0.2s; }
-  .modal-overlay.open .modal { transform: translateY(0); }
-  .modal h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 22px; color: var(--accent); }
-  .form-group { margin-bottom: 18px; }
-  .form-label { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 7px; }
-  .form-input, .form-select, .form-textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 8px; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.9rem; outline: none; transition: border 0.15s; }
-  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
-  .form-textarea { min-height: 110px; resize: vertical; font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; }
-  .form-select option { background: var(--surface); }
-  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+.toggle-btn {
+  background: none;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  width: 34px; height: 34px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 4px;
+  padding: 9px;
+  transition: background 0.12s;
+  flex-shrink: 0;
+}
+.toggle-btn:hover { background: var(--ink); }
+.toggle-btn:hover .bar { background: var(--paper); }
+.bar { width: 14px; height: 1px; background: var(--ink); }
 
-  .group-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.62rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    padding: 12px 10px 5px;
-    opacity: 0.6;
-  }
-  .type-radio { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--muted); font-size: 0.9rem; transition: all 0.15s; cursor: pointer; }
-  .type-radio:hover { border-color: var(--text); color: var(--text); }
-  .type-radio.active { border-color: var(--accent); color: var(--accent); background: rgba(240,192,64,0.07); }
+.topbar-wordmark {
+  font-family: var(--font-head);
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.topbar-wordmark em {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--muted);
+}
 
-  .section-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
-  .view-question { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 0.93rem; line-height: 1.75; color: var(--text); white-space: pre-wrap; }
-  .view-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-  .solution-box { background: var(--bg); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 0.87rem; line-height: 1.8; color: var(--text); white-space: pre-wrap; }
+.search-wrap {
+  flex: 1;
+  max-width: 360px;
+  position: relative;
+}
+.search-wrap input {
+  width: 100%;
+  border: 1px solid var(--rule);
+  background: var(--off);
+  color: var(--ink);
+  padding: 7px 14px 7px 34px;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  outline: none;
+  transition: border-color 0.12s;
+  border-radius: 0;
+}
+.search-wrap input::placeholder { color: var(--faint); }
+.search-wrap input:focus { border-color: var(--ink); background: var(--paper); }
+.search-ico {
+  position: absolute; left: 11px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--faint); pointer-events: none;
+}
 
-  /* ── AI-Refined Solution Styles ── */
-  .ai-solution { font-family: 'IBM Plex Sans', sans-serif; font-size: 0.9rem; line-height: 1.8; color: var(--text); }
-  .sol-section { margin-bottom: 18px; }
-  .sol-section-title { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid rgba(240,192,64,0.2); }
-  .sol-step { display: flex; gap: 14px; margin-bottom: 14px; background: var(--surface2); border-radius: 8px; padding: 12px 14px; border: 1px solid var(--border); align-items: flex-start; }
-  .step-num { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; font-weight: 600; color: var(--accent); background: rgba(240,192,64,0.1); border: 1px solid rgba(240,192,64,0.3); border-radius: 5px; padding: 2px 8px; white-space: nowrap; margin-top: 2px; flex-shrink: 0; }
-  .sol-step > span:last-child, .sol-step > div:last-child { flex: 1; }
-  .sol-result { background: rgba(80,200,120,0.08); border: 1px solid rgba(80,200,120,0.3); border-left: 3px solid var(--accent3); border-radius: 8px; padding: 14px 18px; margin-top: 16px; font-weight: 600; }
-  .sol-result::before { content: '✓ Final Answer'; display: block; font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent3); margin-bottom: 6px; }
-  .sol-note { background: rgba(91,138,240,0.07); border: 1px solid rgba(91,138,240,0.2); border-radius: 6px; padding: 10px 14px; margin: 8px 0; font-size: 0.83rem; color: var(--muted); font-style: italic; }
-  .sol-note::before { content: '💡 '; }
-  code.math { font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; background: rgba(240,192,64,0.08); color: var(--accent); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(240,192,64,0.15); }
-  .ai-badge { display: inline-flex; align-items: center; gap: 5px; font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; color: var(--muted); border: 1px solid var(--border); border-radius: 999px; padding: 2px 9px; margin-bottom: 14px; }
-  .no-solution { background: var(--bg); border: 1px dashed var(--border); border-radius: 8px; padding: 20px; font-size: 0.85rem; color: var(--muted); font-style: italic; text-align: center; }
-  .notes-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
-  .notes-area { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 12px 14px; border-radius: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 0.83rem; outline: none; min-height: 70px; resize: vertical; transition: border 0.15s; line-height: 1.6; }
-  .notes-area:focus { border-color: var(--accent); }
+.topbar-meta {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--faint);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
 
-  .group-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 14px;
-  }
-  .group-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 18px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface2);
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .group-progress {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.72rem;
-    color: var(--muted);
-  }
-  .q-rows { display: flex; flex-direction: column; }
-  .q-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 13px 18px;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-  .q-row:last-child { border-bottom: none; }
-  .q-row:hover { background: var(--surface2); }
-  .q-row-solved { border-left: 3px solid var(--accent3); }
-  .q-row-num {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.72rem;
-    color: var(--muted);
-    min-width: 22px;
-    padding-top: 2px;
-  }
-  .q-row-text {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.88rem;
-    color: var(--text);
-    flex: 1;
-    line-height: 1.6;
-  }
-  .q-row-status {
-    font-size: 0.75rem;
-    padding: 2px 8px;
-    border-radius: 999px;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 12px 18px; border-radius: 10px; font-size: 0.85rem; z-index: 2000; transform: translateY(80px); opacity: 0; transition: all 0.3s; font-family: 'IBM Plex Mono', monospace; }
-  .toast.show { transform: translateY(0); opacity: 1; }
-  .toast.success { border-color: var(--accent3); color: var(--accent3); }
-  .toast.error { border-color: var(--danger); color: var(--danger); }
+/* ══════════════════════════════════════════
+   CONTENT
+══════════════════════════════════════════ */
+.content { padding: 0 0 80px; }
 
-  @media (max-width: 640px) {
-    .sidebar { display: none; }
-    .main { padding: 16px; }
-    .stats-row { grid-template-columns: 1fr 1fr; }
-  }
+/* ══════════════════════════════════════════
+   CHAPTER BLOCK
+══════════════════════════════════════════ */
+.chapter-block {
+  border-bottom: 1px solid var(--rule);
+  animation: fadeIn 0.3s ease both;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.chapter-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 28px 36px 20px;
+  border-bottom: 1px solid var(--rule);
+}
+.ch-num {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--faint);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  flex-shrink: 0;
+  padding-top: 3px;
+}
+.ch-title {
+  font-family: var(--font-head);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  flex: 1;
+}
+.ch-dot { display: none; }
+.ch-line { display: none; }
+.ch-count {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--faint);
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════
+   TAB ROW
+══════════════════════════════════════════ */
+.tab-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 36px;
+  border-bottom: 1px solid var(--rule);
+}
+.tab-btn {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 12px 18px 11px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--faint);
+  transition: color 0.12s;
+  position: relative;
+  border-radius: 0;
+}
+.tab-btn:hover { color: var(--ink); }
+.tab-btn.active {
+  color: var(--ink) !important;
+  font-weight: 500;
+  background: none !important;
+}
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0; right: 0;
+  height: 2px;
+  background: var(--ink);
+}
+.tab-count {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--faint);
+  margin-left: 12px;
+  letter-spacing: 0.06em;
+}
+
+/* ══════════════════════════════════════════
+   QUESTION ROWS
+══════════════════════════════════════════ */
+.q-list { display: flex; flex-direction: column; }
+
+.q-row {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.q-row:hover { background: var(--off); }
+.q-row:last-child { border-bottom: none; }
+
+.q-index {
+  padding: 18px 0 18px 36px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--faint);
+  line-height: 1.7;
+  align-self: flex-start;
+  padding-top: 20px;
+}
+.q-body { padding: 18px 20px 18px 0; }
+.q-text {
+  font-size: 0.9rem;
+  line-height: 1.75;
+  color: var(--ink);
+  font-weight: 400;
+}
+.q-tail {
+  padding: 20px 32px 18px 0;
+  display: flex;
+  align-items: flex-start;
+}
+.ans-chip {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  padding: 3px 8px;
+  border: 1px solid;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-radius: 0;
+  /* color/border set inline */
+}
+
+/* Override inline colored chips to B&W */
+.q-row .ans-chip {
+  color: var(--muted) !important;
+  border-color: var(--rule) !important;
+  background: transparent !important;
+}
+.q-row .ans-chip[style*="Derivation"],
+.q-row .ans-chip:empty {
+  color: var(--faint) !important;
+}
+
+/* Problem type tags */
+.q-type-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 2px 6px;
+  border: 1px solid var(--rule);
+  color: var(--faint);
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.empty {
+  padding: 48px 36px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--faint);
+  letter-spacing: 0.06em;
+}
+
+/* ══════════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════════ */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.q-list.anim-right { animation: slideInRight 0.18s ease both; }
+.q-list.anim-left  { animation: slideInLeft  0.18s ease both; }
+
+/* ══════════════════════════════════════════
+   MODAL / OVERLAY
+══════════════════════════════════════════ */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s;
+  backdrop-filter: blur(4px);
+}
+.overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  width: 96%;
+  max-width: 860px;
+  max-height: 92vh;
+  overflow-y: auto;
+  transform: translateY(14px);
+  transition: transform 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+.overlay.open .modal { transform: translateY(0); }
+
+.modal-header {
+  padding: 22px 28px 18px;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+.m-tag {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.m-chapter {
+  font-family: var(--font-head);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+.modal-close {
+  background: none;
+  border: 1px solid var(--rule);
+  color: var(--muted);
+  width: 30px; height: 30px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.12s;
+  border-radius: 0;
+}
+.modal-close:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+.modal-body { padding: 24px 28px; }
+
+.m-question {
+  font-size: 0.97rem;
+  line-height: 1.8;
+  color: var(--ink);
+  font-weight: 400;
+  margin-bottom: 20px;
+}
+
+.m-answer {
+  background: var(--off);
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--ink);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+.m-answer .al {
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.m-answer .av {
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  color: var(--ink);
+}
+
+.modal-footer {
+  padding: 16px 28px 22px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  border-top: 1px solid var(--rule);
+}
+
+/* ── BUTTONS ── */
+.btn {
+  padding: 9px 20px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  border-radius: 0;
+  transition: all 0.12s;
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--rule);
+}
+.btn-ghost:hover { color: var(--ink); border-color: var(--ink); }
+.btn-lime {  /* repurposed as primary black button */
+  background: var(--ink);
+  color: var(--paper);
+  border: 1px solid var(--ink);
+}
+.btn-lime:hover { background: #222; }
+.btn-off {
+  background: transparent;
+  color: var(--faint);
+  border: 1px dashed var(--rule);
+  cursor: not-allowed;
+}
+
+/* ══════════════════════════════════════════
+   AI SOLVER UI
+══════════════════════════════════════════ */
+.ai-solver-wrap { margin-top: 4px; }
+
+.ai-stage-bar {
+  display: flex; gap: 8px;
+  margin-bottom: 14px;
+}
+.ai-stage-pill {
+  font-family: var(--font-mono);
+  font-size: 0.57rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 4px 10px;
+  border: 1px solid var(--rule);
+  color: var(--faint);
+  display: flex; align-items: center; gap: 5px;
+  transition: all 0.15s;
+}
+.ai-stage-pill.active { border-color: var(--ink); color: var(--ink); }
+.ai-stage-pill.done { border-color: var(--ink); color: var(--ink); background: var(--ink); color: var(--paper); }
+.ai-stage-pill.error { border-color: #cc0000; color: #cc0000; }
+.ai-stage-dot { width: 4px; height: 4px; background: currentColor; flex-shrink: 0; }
+.ai-stage-dot.spin { animation: blink 0.8s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+.ai-slot {
+  border: 1px dashed var(--rule);
+  padding: 20px 22px;
+  min-height: 64px;
+  display: flex; align-items: center; justify-content: center;
+}
+.ai-slot.loading { border-style: solid; border-color: var(--rule); justify-content: flex-start; align-items: flex-start; }
+.ai-slot.has-result { border: none; padding: 0; display: block; }
+.ai-slot-placeholder {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--faint);
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+.ai-progress-text {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--ink);
+  display: flex; align-items: center; gap: 8px;
+}
+.ai-progress-text::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  background: var(--ink);
+  animation: blink 0.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+.ai-model-badge {
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  color: var(--muted);
+  background: var(--off);
+  border: 1px solid var(--rule);
+  padding: 2px 7px;
+  display: inline-block;
+  margin-bottom: 0 !important;
+  letter-spacing: 0.04em;
+}
+.ai-error {
+  border: 1px solid #cc0000;
+  padding: 12px 16px;
+  color: #cc0000;
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+}
+
+/* ══════════════════════════════════════════
+   SOLUTION — TEXTBOOK STYLE (B&W)
+══════════════════════════════════════════ */
+.ai-solution {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  font-size: 1.0rem;
+  line-height: 1.9;
+  font-family: var(--font-body);
+}
+
+.ai-solution .sol-header {
+  padding: 11px 20px 10px;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--off);
+}
+.ai-solution .sol-header-title {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+
+.ai-solution .sol-body { padding: 20px 24px 24px; }
+
+/* Steps */
+.ai-solution .sol-step {
+  margin-bottom: 18px;
+  text-align: left;
+}
+.ai-solution .sol-step:last-of-type { margin-bottom: 0; }
+.ai-solution .step-num { display: none !important; }
+
+/* Prose */
+.ai-solution .sol-text {
+  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1.85;
+  margin: 0 0 6px;
+}
+
+/* Equation lines */
+.ai-solution .math-block {
+  display: block;
+  padding: 3px 0 3px 24px;
+  margin: 4px 0;
+  font-family: var(--font-mono);
+  font-size: 0.97rem;
+  color: var(--ink);
+  line-height: 2.4;
+  background: none;
+  border: none;
+  overflow-x: auto;
+  text-align: left;
+}
+
+/* Inline math */
+.ai-solution code.math {
+  font-family: var(--font-mono);
+  font-size: 0.94em;
+  color: var(--ink);
+  background: none;
+  padding: 0;
+}
+
+/* Stacked fractions */
+.ai-solution .frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  margin: 0 3px;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  line-height: 1.2;
+}
+.ai-solution .frac .num {
+  border-bottom: 1.5px solid var(--ink);
+  padding: 0 4px 2px;
+  text-align: center;
+  min-width: 1em;
+}
+.ai-solution .frac .den {
+  padding: 2px 4px 0;
+  text-align: center;
+  min-width: 1em;
+}
+
+/* Square root */
+.ai-solution .sqrt {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  font-family: var(--font-mono);
+}
+.ai-solution .sqrt::before {
+  content: '√';
+  font-size: 1.05em;
+  margin-right: 1px;
+  line-height: 1;
+}
+.ai-solution .sqrt-body {
+  border-top: 1.5px solid var(--ink);
+  padding: 0 3px;
+  display: inline-block;
+}
+
+/* Key formula block */
+.ai-solution .sol-note {
+  display: block;
+  background: var(--off);
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--ink);
+  padding: 11px 16px;
+  margin: 14px 0 8px;
+  color: var(--ink);
+  font-size: 0.95rem;
+  font-family: var(--font-mono);
+  text-align: left;
+  line-height: 2.2;
+}
+
+/* Final answer */
+.ai-solution .sol-result {
+  margin: 16px -24px -24px;
+  padding: 14px 24px;
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.ai-solution .sol-result-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(255,255,255,0.5);
+  flex-shrink: 0;
+}
+.ai-solution .sol-result-val {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  color: var(--paper);
+  font-weight: 500;
+}
+.ai-solution .sol-result-val code.math {
+  color: var(--paper);
+  background: none;
+  padding: 0;
+}
+/* frac inside result */
+.ai-solution .sol-result .frac .num { border-color: rgba(255,255,255,0.6); color: var(--paper); }
+.ai-solution .sol-result .frac .den { color: var(--paper); }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>∂ MathBank <span>Engineering Mathematics I — ENSH 101</span></h1>
-  <div style="display:flex;align-items:center;gap:12px">
-    <span style="font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:var(--muted)">
-      <span class="online-dot"></span><span id="connStatus">connecting...</span>
-    </span>
-    <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Add Question</button>
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-logo">Physics Bank</div>
+    <div class="sidebar-sub">SH 401 · TU IOE · 2022</div>
   </div>
-</header>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Curriculum</div>
+    <button class="nav-item active" onclick="filterCh('all',this)">
+      <span class="nav-index">—</span>All Topics
+    </button>
+    <button class="nav-item" onclick="filterCh('osc',this)">
+      <span class="nav-index">01</span>Mechanical Oscillation
+    </button>
+    <button class="nav-item" onclick="filterCh('wave',this)">
+      <span class="nav-index">02</span>Wave Motion
+    </button>
+    <button class="nav-item" onclick="filterCh('acoustic',this)">
+      <span class="nav-index">03</span>Acoustic
+    </button>
+    <button class="nav-item" onclick="filterCh('optics',this)">
+      <span class="nav-index">04</span>Physical Optics
+    </button>
+    <button class="nav-item" onclick="filterCh('estatic',this)">
+      <span class="nav-index">05</span>Electrostatics
+    </button>
+    <button class="nav-item" onclick="filterCh('emag',this)">
+      <span class="nav-index">06</span>Electricity &amp; Magnetism
+    </button>
+    <button class="nav-item" onclick="filterCh('em',this)">
+      <span class="nav-index">07</span>Electromagnetism
+    </button>
+    <button class="nav-item" onclick="filterCh('photon',this)">
+      <span class="nav-index">08</span>Photon &amp; Matter Wave
+    </button>
+  </nav>
+  <div class="sidebar-footer">Umakanta Joshi · 2022</div>
+</aside>
 
-<div class="app">
-  <aside class="sidebar">
-    <div class="sidebar-label">Topics</div>
-    <button class="nav-item active" id="topicBtn-all" onclick="setTopic('all',this)">
-      <span class="nav-dot dot-all"></span> All Topics <span class="nav-count" id="cnt-all">0</span>
+<!-- MAIN -->
+<div class="main" id="mainArea">
+  <div class="topbar">
+    <button class="toggle-btn" onclick="toggleSidebar()" title="Toggle sidebar">
+      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
     </button>
-
-    <div class="group-label">Limits & Derivatives</div>
-    <button class="nav-item" id="topicBtn-limits" onclick="setTopic('limits',this)">
-      <span class="nav-dot dot-lim"></span> Limits <span class="nav-count" id="cnt-limits">0</span>
-    </button>
-    <button class="nav-item" id="topicBtn-higher_derivatives" onclick="setTopic('higher_derivatives',this)">
-      <span class="nav-dot dot-lim"></span> Higher Order Derivatives <span class="nav-count" id="cnt-higher_derivatives">0</span>
-    </button>
-    <button class="nav-item" id="topicBtn-asymptotes" onclick="setTopic('asymptotes',this)">
-      <span class="nav-dot dot-lim"></span> Asymptotes <span class="nav-count" id="cnt-asymptotes">0</span>
-    </button>
-    <button class="nav-item" id="topicBtn-pedal_equation" onclick="setTopic('pedal_equation',this)">
-      <span class="nav-dot dot-lim"></span> Pedal Equation <span class="nav-count" id="cnt-pedal_equation">0</span>
-    </button>
-    <button class="nav-item" id="topicBtn-radius_curvature" onclick="setTopic('radius_curvature',this)">
-      <span class="nav-dot dot-lim"></span> Radius of Curvature <span class="nav-count" id="cnt-radius_curvature">0</span>
-    </button>
-
-    <div class="group-label">Integration</div>
-    <button class="nav-item" id="topicBtn-methods_integration" onclick="setTopic('methods_integration',this)">
-      <span class="nav-dot dot-int"></span> Methods of Integration <span class="nav-count" id="cnt-methods_integration">0</span>
-    </button>
-    <button class="nav-item" id="topicBtn-definite_integral" onclick="setTopic('definite_integral',this)">
-      <span class="nav-dot dot-int"></span> Definite Integral <span class="nav-count" id="cnt-definite_integral">0</span>
-    </button>
-    <button class="nav-item" id="topicBtn-diff_integral_sign" onclick="setTopic('diff_integral_sign',this)">
-      <span class="nav-dot dot-int"></span> Diff. Under Integral Sign <span class="nav-count" id="cnt-diff_integral_sign">0</span>
-    </button>
-    <button class="nav-item" id="topicBtn-improper_integral" onclick="setTopic('improper_integral',this)">
-      <span class="nav-dot dot-int"></span> Improper Integral <span class="nav-count" id="cnt-improper_integral">0</span>
-    </button>
-    <button class="nav-item" id="topicBtn-beta_gamma" onclick="setTopic('beta_gamma',this)">
-      <span class="nav-dot dot-int"></span> Beta & Gamma Function <span class="nav-count" id="cnt-beta_gamma">0</span>
-    </button>
-    <button class="nav-item" id="topicBtn-area_curve" onclick="setTopic('area_curve',this)">
-      <span class="nav-dot dot-int"></span> Area Under Curve <span class="nav-count" id="cnt-area_curve">0</span>
-    </button>
-    <button class="nav-item" id="topicBtn-arc_length" onclick="setTopic('arc_length',this)">
-      <span class="nav-dot dot-int"></span> Arc Length <span class="nav-count" id="cnt-arc_length">0</span>
-    </button>
-    <button class="nav-item" id="topicBtn-surface_revolution" onclick="setTopic('surface_revolution',this)">
-      <span class="nav-dot dot-int"></span> Surface of Revolution <span class="nav-count" id="cnt-surface_revolution">0</span>
-    </button>
-    <button class="nav-item" id="topicBtn-volume_revolution" onclick="setTopic('volume_revolution',this)">
-      <span class="nav-dot dot-int"></span> Volume of Revolution <span class="nav-count" id="cnt-volume_revolution">0</span>
-    </button>
-    <button class="nav-item" id="topicBtn-centroid_inertia" onclick="setTopic('centroid_inertia',this)">
-      <span class="nav-dot dot-int"></span> Centroid & Moment of Inertia <span class="nav-count" id="cnt-centroid_inertia">0</span>
-    </button>
-
-    <div class="group-label">Differential Equations</div>
-    <button class="nav-item" id="topicBtn-homogeneous_ode" onclick="setTopic('homogeneous_ode',this)">
-      <span class="nav-dot dot-ode"></span> Homogeneous ODE <span class="nav-count" id="cnt-homogeneous_ode">0</span>
-    </button>
-    <button class="nav-item" id="topicBtn-bernoulli" onclick="setTopic('bernoulli',this)">
-      <span class="nav-dot dot-ode"></span> Bernoulli's Equation <span class="nav-count" id="cnt-bernoulli">0</span>
-    </button>
-    <button class="nav-item" id="topicBtn-first_higher_ode" onclick="setTopic('first_higher_ode',this)">
-      <span class="nav-dot dot-ode"></span> First & Higher Order ODE <span class="nav-count" id="cnt-first_higher_ode">0</span>
-    </button>
-    <button class="nav-item" id="topicBtn-second_order_linear" onclick="setTopic('second_order_linear',this)">
-      <span class="nav-dot dot-ode"></span> Second Order Linear ODE <span class="nav-count" id="cnt-second_order_linear">0</span>
-    </button>
-    <button class="nav-item" id="topicBtn-second_nonhomogeneous" onclick="setTopic('second_nonhomogeneous',this)">
-      <span class="nav-dot dot-ode"></span> Second Order Non-Homogeneous <span class="nav-count" id="cnt-second_nonhomogeneous">0</span>
-    </button>
-    <button class="nav-item" id="topicBtn-application_ode" onclick="setTopic('application_ode',this)">
-      <span class="nav-dot dot-ode"></span> Application of 2nd Order ODE <span class="nav-count" id="cnt-application_ode">0</span>
-    </button>
-
-    <hr class="divider" />
-    <div class="sidebar-label">Type</div>
-    <button class="status-btn active" id="typeBtn-all" onclick="setType('all',this)">All Types</button>
-    <button class="status-btn" id="typeBtn-example" onclick="setType('example',this)">📘 Examples</button>
-    <button class="status-btn" id="typeBtn-exercise" onclick="setType('exercise',this)">✏️ Exercises</button>
-
-    <hr class="divider" />
-    <div class="sidebar-label">Status</div>
-    <button class="status-btn active" id="statusBtn-all" onclick="setStatus('all',this)">All Questions</button>
-    <button class="status-btn" id="statusBtn-false" onclick="setStatus('false',this)">Unsolved</button>
-    <button class="status-btn" id="statusBtn-true" onclick="setStatus('true',this)">Solved</button>
-  </aside>
-
-  <main class="main">
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-label">Total Questions</div>
-        <div class="stat-value" id="statTotal">—</div>
-        <div class="stat-sub">across 3 topics</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Solved</div>
-        <div class="stat-value" id="statSolved">—</div>
-        <div class="stat-sub" id="statPct">loading...</div>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Unsolved</div>
-        <div class="stat-value" id="statUnsolved">—</div>
-        <div class="stat-sub">remaining</div>
-      </div>
+    <div class="topbar-wordmark">Physics <em>Problem Set</em></div>
+    <div class="search-wrap">
+      <svg class="search-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="Search problems…" oninput="applyFilters()"/>
     </div>
-
-    <div class="topbar">
-      <div class="search-wrap">
-        <span class="search-icon">⌕</span>
-        <input type="text" id="searchInput" placeholder="Search questions..." oninput="debounceSearch()" />
-      </div>
-    </div>
-
-    <div id="questionsList" class="questions-list">
-      <div class="skeleton skeleton-card"></div>
-      <div class="skeleton skeleton-card"></div>
-      <div class="skeleton skeleton-card"></div>
-    </div>
-  </main>
+    <div class="topbar-meta">SH 401 · 265 Problems</div>
+  </div>
+  <div class="content" id="content"></div>
 </div>
 
-<!-- ADD MODAL -->
-<div class="modal-overlay" id="addModal">
+<!-- MODAL -->
+<div class="overlay" id="overlay">
   <div class="modal">
-    <h2>Add Question</h2>
-    <div class="form-group">
-      <label class="form-label">Type</label>
-      <div style="display:flex;gap:10px">
-        <div style="flex:1" onclick="selectType('example')">
-          <div class="type-radio" id="typeExampleBox">📘 Example</div>
+    <div class="modal-header">
+      <div>
+        <div class="m-tag" id="mTag"></div>
+        <div class="m-chapter" id="mChapter"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="m-question" id="mQuestion"></div>
+      <div id="mAnswer"></div>
+      <div class="ai-solver-wrap">
+        <div class="ai-stage-bar" id="aiStageBars" style="display:none;">
+          <div class="ai-stage-pill" id="pill-solve"><span class="ai-stage-dot"></span>1 · Solve</div>
+          <div class="ai-stage-pill" id="pill-format"><span class="ai-stage-dot"></span>2 · Format</div>
         </div>
-        <div style="flex:1" onclick="selectType('exercise')">
-          <div class="type-radio active" id="typeExerciseBox">✏️ Exercise</div>
+        <div class="ai-slot" id="aiSlot">
+          <div class="ai-slot-placeholder">AI step-by-step solver — click <em>Solve with AI</em> to begin</div>
         </div>
       </div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Topic</label>
-      <select class="form-select" id="newTopic">
-        <optgroup label="── Limits & Derivatives ──">
-          <option value="limits">Limits</option>
-          <option value="higher_derivatives">Higher Order Derivatives</option>
-          <option value="asymptotes">Asymptotes</option>
-          <option value="pedal_equation">Pedal Equation</option>
-          <option value="radius_curvature">Radius of Curvature</option>
-        </optgroup>
-        <optgroup label="── Integration ──">
-          <option value="methods_integration">Methods of Integration</option>
-          <option value="definite_integral">Review of Definite Integral</option>
-          <option value="diff_integral_sign">Differentiation Under Integral Sign</option>
-          <option value="improper_integral">Improper Integral</option>
-          <option value="beta_gamma">Beta & Gamma Function</option>
-          <option value="area_curve">Area Under Curve</option>
-          <option value="arc_length">Arc Length</option>
-          <option value="surface_revolution">Area of Surface of Revolution</option>
-          <option value="volume_revolution">Volume of Solid of Revolution</option>
-          <option value="centroid_inertia">Centroid & Moment of Inertia</option>
-        </optgroup>
-        <optgroup label="── Differential Equations ──">
-          <option value="homogeneous_ode">Homogeneous Differential Equation</option>
-          <option value="bernoulli">Bernoulli's Equation</option>
-          <option value="first_higher_ode">First Order & Higher Order ODE</option>
-          <option value="second_order_linear">Second Order Linear ODE</option>
-          <option value="second_nonhomogeneous">Second Order Non-Homogeneous ODE</option>
-          <option value="application_ode">Application of Second Order ODE</option>
-        </optgroup>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Subtopic (optional)</label>
-      <input type="text" class="form-input" id="newSubtopic" placeholder="e.g. L'Hôpital's Rule..." />
-    </div>
-    <div class="form-group">
-      <label class="form-label">Question</label>
-      <textarea class="form-textarea" id="newQuestion" placeholder="Type the question here..."></textarea>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Solution</label>
-      <textarea class="form-textarea" id="newSolution" placeholder="Type the solution here (optional, can add later)..."></textarea>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Page Number (optional)</label>
-      <input type="text" class="form-input" id="newPage" placeholder="e.g. 45" />
-    </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeAddModal()">Cancel</button>
-      <button class="btn btn-primary" id="addBtn" onclick="addQuestion()">Add Question</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+      <button class="btn btn-lime" id="solveBtn" onclick="solveWithAI()">⚡ Solve with AI</button>
     </div>
   </div>
 </div>
-
-<!-- VIEW MODAL -->
-<div class="modal-overlay" id="viewModal">
-  <div class="modal">
-    <div id="viewContent"></div>
-    <div class="modal-footer">
-      <button class="btn btn-danger btn-sm" onclick="deleteCurrentQ()">Delete</button>
-      <button class="btn btn-ghost" onclick="closeViewModal()">Close</button>
-      <button class="btn btn-sm btn-wolfram" id="wolframBtn" onclick="solveWithWolfram()">🧮 Solve with Wolfram</button>
-      <button class="btn btn-sm" id="solveBtn" onclick="toggleSolved()"></button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
 
 <script>
-// ── CONFIG — change this to your Railway backend URL after deploying ──
-const API = window.location.hostname === 'localhost'
-  ? 'http://localhost:3000'
-  : 'https://mathproject-faua.onrender.com'; // <-- update this after deploying backend
+const TOPICS = [
+  {
+    id:'osc', title:'Mechanical Oscillation', color:'var(--ink)', ac:'#000',
+    tutorial:[
+      {n:'T1',  t:'A wave of frequency 500 cycles/sec has a phase velocity of 350 m/s. How far apart are two points 60° out of phase?', a:'0.117 m'},
+      {n:'T2',  t:'The equation of a transverse wave travelling in a rope is y = 10 sin π(0.01x − 2t) cm. Find the amplitude, frequency, velocity and wavelength of the wave.', a:''},
+      {n:'T3',  t:'A linear spring (force constant 0.2 N/m) hangs vertically supporting a 1 kg mass at rest. The mass is pulled down 0.2 m and released. What is the maximum velocity? Also find the frequency of vibration.', a:'0.089 m/s · 0.071 Hz'},
+      {n:'T4',  t:'A small body of mass 0.1 kg undergoes SHM of amplitude 0.1 m and period 2 s. (1) What is the maximum force on the body? (2) If the oscillations are produced by a spring, what should be the force constant?', a:'0.0986 N'},
+      {n:'T5',  t:'A light spring is suspended from a rigid support with a 0.4 kg mass producing 6 cm extension. The mass is pulled down 4 cm further and released. Calculate the kinetic energy as it passes through the mean position.', a:'0.0523 J'},
+      {n:'T6',  t:'The balance wheel of a watch oscillates with angular amplitude π rad and period 0.5 s. Find (a) maximum angular speed, (b) angular speed when displacement is π/2 rad, and (c) magnitude of angular acceleration when displacement is π/4 rad.', a:'39.44 rad/s · 34.15 rad/s · 123.84 rad/s²'},
+      {n:'T7',  t:'Show that the time period of oscillation of a loaded spring is T = 2π√(m/k).', a:'Derivation'},
+      {n:'T8',  t:'Show that if a uniform stick of length l is mounted to rotate about a horizontal axis perpendicular to the stick at distance d from the centre of gravity, the period has a minimum value when d = 0.289l.', a:'0.289l'},
+      {n:'T9',  t:'A thin straight uniform rod (length 1 m, mass 160 g) hangs from a pivot at one end. (a) What is its time period for small amplitude oscillation? (b) What is the length of a simple pendulum with the same time period?', a:'1.63 s · 0.66 m'},
+      {n:'T10', t:'A sinusoidal wave travels along a string. The time for a particular point to move from maximum displacement to zero is 0.17 s. (a) Find period and frequency. (b) If wavelength is 1.4 m, find the wave speed.', a:'0.68 s · 1.47 Hz · 2.05 m/s'},
+    ],
+    assignment:[
+      {n:'A1',  t:'An oscillatory motion of a body is represented by x = A sin(ωt) where x is displacement, A is amplitude and ω is angular frequency. Show that the motion is simple harmonic.', a:'Derivation'},
+      {n:'A2',  t:'A linear spring (force constant 0.2 N/m) hangs vertically supporting a 1 kg mass. The mass is pulled down 0.2 m and released. Find the maximum velocity and frequency of vibration.', a:'See solution'},
+      {n:'A3',  t:'A small body of mass 0.1 kg undergoes SHM of amplitude 0.1 m and period 2 s. (i) What is the maximum force? (ii) If produced by a spring, what is the force constant?', a:'See solution'},
+      {n:'A4',  t:'An oscillating block-spring system has mechanical energy 1.18 J, amplitude 9.84 cm and maximum speed 1.22 m/s. Find (i) force constant (ii) mass of block (iii) frequency of oscillation.', a:'See solution'},
+      {n:'A5',  t:'The balance wheel of a watch oscillates with angular amplitude π and period 0.5 s. Find (i) max angular speed, (ii) angular speed when displacement is π/2, (iii) angular acceleration when displacement is π/4.', a:'See solution'},
+      {n:'A6',  t:'A mass of 2 kg is suspended from a spring (k = 18 N/m). If the un-damped frequency is 2/√3 times the damped frequency, find the damping factor.', a:'See solution'},
+      {n:'A7',  t:'The relaxation time of a damped harmonic oscillator is 50 s. Find the time in which (i) amplitude and (ii) energy falls to 1/e of its initial value if mass = 0.25 g and damping constant = 0.01 g/s.', a:'See solution'},
+      {n:'A8',  t:'A radio tuner has frequency range 500 kHz to 5 MHz. If its LC circuit has effective inductance 400 μH, find the range of its variable capacitor.', a:'2.535×10⁻¹² to 2.535×10⁻¹⁰ F'},
+      {n:'A9',  t:'A circuit has L = 10 mH and C = 10 μF. How much resistance should be added so that the oscillation frequency is 1% less than the LC frequency?', a:'See solution'},
+      {n:'A10', t:'A 10 mH inductor and capacitors of 5 μF and 2 μF are given. Find the two resonance frequencies obtainable by connecting these elements in different ways.', a:'See solution'},
+      {n:'A11', t:'In an oscillating LC circuit, what value of charge (in terms of maximum charge) is present when energy is shared equally between electric and magnetic fields? At what time does this occur if L = 10 mH and C = 1 μF?', a:'Q = Q₀/√2'},
+      {n:'A12', t:'What resistance R should be connected in series with L = 220 mH and C = 12 μF for the maximum charge to decay to 99% of its initial value in 50 cycles?', a:'See solution'},
+      {n:'A13', t:'A series LCR circuit has L = 12 mH, C = 1.6 μF, R = 1.5 Ω. (i) When does charge amplitude fall to 50% of initial? (ii) How many oscillation periods does this correspond to?', a:'See solution'},
+      {n:'A14', t:'A simple pendulum (length 40 cm, mass 50 g) is in a car travelling at constant speed 40 m/s around a circle of radius 100 m. If the pendulum oscillates radially about its equilibrium, find its frequency.', a:'See solution'},
+      {n:'A15', t:'The amplitude of a lightly damped oscillator decreases by 3% per cycle. What fraction of energy is lost per full oscillation?', a:'See solution'},
+      {n:'A16', t:'In damped harmonic motion, calculate the time for (i) amplitude and (ii) energy to fall to 1/e of their undamped values if mass = 0.25 g and damping constant = 0.01 g/s.', a:'See solution'},
+      {n:'A17', t:'A 750 g block oscillates on a spring (k = 56 N/m) in a fluid with resistive force F = −bv where b = 0.162 Ns/m. What is the period of oscillation?', a:'See solution'},
+      {n:'A18', t:'A 2 μF capacitor is charged to 50 V. The battery is disconnected and a 50 mH coil is connected across it for LC oscillation. Find the maximum current in the circuit.', a:'See solution'},
+      {n:'A19', t:'A circuit has L = 1.2 mH, C = 1.6 μF, R = 1.5 Ω. (a) After what time does the charge amplitude drop to half? (b) How many periods does this correspond to?', a:'See solution'},
+      {n:'A20', t:'Find the capacitance for a tuned circuit of frequency 10 MHz with L = 0.01 mH. Resistance is negligible.', a:'See solution'},
+      {n:'A21', t:'A 20 mH inductor and 600 μF capacitor form an oscillating circuit. If initial charge is 60 μC, find peak current.', a:'See solution'},
+      {n:'A22', t:'A circuit has L = 5 mH and C = 2 μF. How much resistance must be inserted to reduce resonance frequency by 5%?', a:'See solution'},
+      {n:'A23', t:'Calculate resonating frequency and quality factor of a circuit with C = 0.02 μF, L = 8 mH and R = 0.25 Ω.', a:'See solution'},
+    ]
+  },
+  {
+    id:'wave', title:'Wave Motion', color:'var(--ink)', ac:'#000',
+    tutorial:[
+      {n:'T1',  t:'A stretched string has linear density 525 gm/m under tension 45 N. A sinusoidal wave (120 Hz, amplitude 8.5 mm) is sent from one end. At what average rate does the wave transport energy?', a:'99.74 W'},
+      {n:'T2',  t:'A source of sound has frequency 512 Hz and amplitude 0.25 cm. What is the flow of energy across a square cm per second if velocity of sound in air is 340 m/s and density of air is 0.00129 gm/cm³?', a:'1.417 W/cm²'},
+      {n:'T3',  t:'A stretched string (linear mass density 5 gm/cm, tension 10 N) carries a wave of amplitude 0.12 mm, frequency 100 Hz, travelling in the −x direction. Write the wave equation with appropriate units.', a:''},
+      {n:'T4',  t:'If the intensity of a wave is 1×10⁻⁸ W/m² at 50 km from a source, what is the intensity at 10 km from the source?', a:'2.5×10⁻⁷ W/m²'},
+      {n:'T5',  t:'A transverse wave on a string: y = (2 mm) sin[(20 m⁻¹)x − (600 s⁻¹)t]. Tension = 15 N. (a) Find wave speed. (b) Find linear density in gm/m.', a:'30 m/s · 16.67 gm/m'},
+      {n:'T6',  t:'Calculate the ratio of intensity of the two waves: y₁ = 6 sin(0.4t − 25x) cm and y₂ = 2.5 sin(3.2t − 200x) cm.', a:'0.09'},
+      {n:'T7',  t:'Three waves: (1) y = 2sin(4x−2t), (2) y = 2sin(3x−4t), (3) y = 2sin(2x−3t). Write equations in descending order of (a) wave speed (b) maximum particle velocity.', a:'Speed: 2,1,3 · v_max: 2,3,1'},
+      {n:'T8',  t:'A wave of frequency 500 cycles/sec has phase velocity 350 m/s. (a) How far apart are two points 60° out of phase? (b) What is the phase difference between displacements at a point separated by 10⁻³ s?', a:'0.116 m · π rad'},
+      {n:'T9',  t:'One end of a 14 m rubber tube (total mass 0.8 kg) is fastened to a fixed support. A cord at the other end passes over a pulley supporting 7.5 kg. A transverse blow is struck at one end. Find the travel time to the other end.', a:'0.39 s'},
+      {n:'T10', t:'Calculate the wavelength, frequency, speed and maximum particle velocity for the wave y = 20 sin(2t − 0.05x) with x and y in cm.', a:''},
+      {n:'T11', t:'Calculate the frequency of vibration of air particles in a plane progressive wave of amplitude 2.18×10⁻⁵ m and intensity 10⁻³ W/m². Velocity of sound = 340 m/s, density of air = 0.00129 gm/cc.', a:'493 Hz'},
+      {n:'T12', t:'A progressive and stationary simple harmonic wave each have frequency 250 Hz and velocity 30 m/s. (i) Find the phase difference between two points 10 cm apart in the progressive wave. (ii) Write the wave equation if amplitude is 0.03 m. (iii) Find the distance between nodes in the stationary wave.', a:'5.24° · 0.06 m'},
+      {n:'T13', t:'A stretched string (linear density 525 gm/m, tension 45 N) carries a sinusoidal wave at 120 Hz, amplitude 8.5 mm. At what rate does the wave transport energy?', a:'99.74 W'},
+      {n:'T14', t:'A source of sound (frequency 512 Hz, amplitude 0.25 cm). What is the flow of energy across a square cm per second if v = 340 m/s and ρ = 1.29 kg/m³?', a:'1.417 W/cc'},
+      {n:'T15', t:'Calculate the ratio of intensity of the two waves y₁ = 6 sin(0.4t − 25x) and y₂ = 2.5 sin(3.2t − 200x).', a:'0.09'},
+      {n:'T16', t:'A wave of 500 cycle/s has phase velocity 350 m/s. (i) How far apart are two points 60° out of phase? (ii) What is the phase difference between displacements at a point separated by 10⁻³ s?', a:''},
+      {n:'T17', t:'Calculate the frequency of vibration of air particles in a plane progressive wave of amplitude 10⁻⁵ m and intensity 10⁻³ W/m². Velocity = 340 m/s, density = 0.00129 gm/cc.', a:'493 Hz'},
+      {n:'T18', t:'A sinusoidal wave travels along a string. Time for a point to move from max displacement to zero is 0.17 s. (a) Find period and frequency. (b) If wavelength is 1.40 m, find wave speed.', a:''},
+    ],
+    assignment:[
+      {n:'A1', t:'A stretched string (linear density 525 gm/m, tension 45 N) carries a sinusoidal wave at 120 Hz, amplitude 8.5 mm. At what average rate does the wave transport energy?', a:'99.74 W'},
+      {n:'A2', t:'A source of sound (frequency 512 Hz, amplitude 0.25 cm). What is the flow of energy across a square cm per second if v = 340 m/s?', a:'See solution'},
+      {n:'A3', t:'A transverse wave on a string: y = (2 mm) sin[(20 m⁻¹)x − (600 s⁻¹)t], tension = 15 N. Find (a) wave speed and (b) linear density.', a:'30 m/s · 16.67 g/m'},
+      {n:'A4', t:'Calculate the frequency of vibration of air particles in a plane progressive wave of amplitude 10⁻⁵ m and intensity 10⁻³ W/m². v = 340 m/s, ρ = 1.29 kg/m³.', a:'493 Hz'},
+      {n:'A5', t:'One end of a rope (length 12 m, mass 6 kg) is attached to a support. The other end is pulled down with a force of 588 N. Find the wave speed at 6 m from the support end.', a:'See solution'},
+    ]
+  },
+  {
+    id:'acoustic', title:'Acoustic', color:'var(--ink)', ac:'#000',
+    tutorial:[
+      {n:'T1', t:'A whistle of frequency 540 Hz rotates in a horizontal circle of radius 2 m at 15 rad/s. What are the highest and lowest frequencies heard by a listener at rest at a large distance? (v = 340 m/s)', a:''},
+      {n:'T2', t:'Two loudspeakers S₁ and S₂ are driven by the same oscillator (frequency 200 Hz) 4 m apart. A listener walks from S₁ toward S₂. What is the first position of constructive interference? (v = 336 m/s)', a:''},
+      {n:'T3', t:'Show that for a sound wave, the intensity I = p₀²/(2ρv), where p₀ is the maximum excess pressure, ρ is density and v is speed of sound.', a:'Derivation'},
+      {n:'T4', t:'A tuning fork of frequency 512 Hz is vibrated just over a long pipe closed at lower end. Resonance is first heard when the length is 16.0 cm and again at 49.3 cm. Find the speed of sound and end correction.', a:''},
+      {n:'T5', t:'A train moving at 30 m/s sounds a whistle at 500 Hz. What frequency is heard by: (a) a stationary observer ahead, (b) a stationary observer behind? (v = 340 m/s)', a:''},
+      {n:'T6', t:'Two sound waves y₁ = A sin(kx − ωt) and y₂ = A sin(kx + ωt) superpose. Find the amplitude of vibration at x = 0, λ/8, λ/4.', a:''},
+      {n:'T7', t:'A source of sound of frequency 600 Hz is placed inside water. The speed of sound in water is 1500 m/s and in air 300 m/s. The frequency of sound recorded by an observer standing in air is:', a:'600 Hz'},
+    ],
+    assignment:[
+      {n:'A1', t:'A train approaches a station at 40 m/s blowing a 500 Hz whistle. Find the frequency heard by a station observer. After passing, find the frequency as the train recedes. (v = 340 m/s)', a:''},
+      {n:'A2', t:'Two points A and B on the same side of a tuning fork vibrating at 100 Hz. If v = 340 m/s and AB = 40 cm, find the phase difference between motions at A and B.', a:''},
+      {n:'A3', t:'The intensity at a distance of 10 m from a sound source is 0.8 W/m². Calculate the intensity at 5 m. Also find the sound level in dB at both distances.', a:''},
+      {n:'A4', t:'An observer moves at 10 m/s toward a stationary source emitting 500 Hz. Find the apparent frequency. (v = 340 m/s)', a:''},
+      {n:'A5', t:'Two coherent sources of sound separated by 2 m vibrate in phase at 680 Hz. What is the minimum distance from the midpoint on the line joining the sources where a maximum is observed? (v = 340 m/s)', a:''},
+    ]
+  },
+  {
+    id:'optics', title:'Physical Optics', color:'var(--ink)', ac:'#000',
+    tutorial:[
+      {n:'T1',  t:'In a double-slit experiment (d = 0.2 mm, D = 1 m, λ = 600 nm), find the fringe width.', a:'3 mm'},
+      {n:'T2',  t:'Light of wavelength 600 nm falls on a single slit of width 0.1 mm. Find the angular position of the first minimum.', a:'0.006 rad'},
+      {n:'T3',  t:'A soap film in air has thickness 0.5 μm, n = 1.33. For what wavelengths in the visible range will it appear bright in reflected light?', a:''},
+      {n:'T4',  t:'In Newton\'s rings experiment, the diameter of the 5th ring is 0.336 cm and that of the 15th is 0.590 cm. The radius of curvature of the lens is 100 cm. Find the wavelength of light.', a:'588.8 nm'},
+      {n:'T5',  t:'In a biprism experiment, the slit is illuminated with Na light (λ = 5893 Å). The distance of biprism from slit is 10 cm, screen is 90 cm from biprism. The virtual sources are 0.5 cm apart. Find the fringe width.', a:''},
+      {n:'T6',  t:'A glass slab (n = 1.5) of thickness 3 mm is inserted in the path of one beam in a double-slit experiment (λ = 550 nm). Find the shift in the central fringe.', a:''},
+      {n:'T7',  t:'A diffraction grating has 5000 lines/cm. Find the angular separation of the two sodium lines (589.0 nm and 589.6 nm) in the first order.', a:''},
+      {n:'T8',  t:'Derive the condition for maximum and minimum in double-slit interference. What is the effect of decreasing slit separation on fringe width?', a:'Derivation'},
+      {n:'T9',  t:'In Newton\'s rings, the diameter of 4th dark ring is 0.4 cm and that of 12th dark ring is 0.7 cm. Find the radius of curvature if λ = 589 nm.', a:''},
+      {n:'T10', t:'Light of wavelength 500 nm is used to observe Newton\'s rings. The radius of the 8th bright ring is 1.6 mm. Find the radius of curvature of the lens.', a:''},
+    ],
+    assignment:[
+      {n:'A1', t:'In Young\'s double slit (D = 1 m, d = 1 mm, λ = 500 nm). (a) Find fringe width. (b) If screen is moved 0.5 m closer, find new fringe width.', a:''},
+      {n:'A2', t:'Light of wavelength 600 nm is incident on a grating. The first order maximum is at 30°. Find the number of lines per mm.', a:''},
+      {n:'A3', t:'A thin film of refractive index 1.4 has a minimum thickness for constructive interference of 200 nm in reflected light (λ = 560 nm). Confirm this result.', a:''},
+      {n:'A4', t:'In a biprism experiment, fringes are observed at a distance of 1 m using light of λ = 5890 Å. The fringe width is 0.196 mm. Find the distance between two coherent sources.', a:''},
+      {n:'A5', t:'A diffraction grating with 6000 lines/cm is used to examine light from a mercury lamp. Calculate the angle of diffraction for green line (λ = 546 nm) in 2nd order.', a:''},
+    ]
+  },
+  {
+    id:'estatic', title:'Electrostatics', color:'var(--ink)', ac:'#000',
+    tutorial:[
+      {n:'T1',  t:'Three equal charges Q are at the corners of an equilateral triangle of side a. Find the electric field and potential at the centroid.', a:''},
+      {n:'T2',  t:'A capacitor of capacitance C is charged to potential V. What is the energy stored? What happens to the energy if a dielectric of constant K is inserted?', a:''},
+      {n:'T3',  t:'An electric dipole consists of charges +q and −q separated by distance 2a. Find the electric field at a point on the axis at distance r from the centre (r >> a).', a:''},
+      {n:'T4',  t:'A parallel plate capacitor (area A = 10⁻² m², d = 1 mm, V = 100 V). Find: (a) capacitance, (b) charge, (c) energy stored, (d) electric field.', a:''},
+      {n:'T5',  t:'Using Gauss\'s law, find the electric field due to an infinite plane of uniform surface charge density σ.', a:'Derivation'},
+      {n:'T6',  t:'A charge Q is uniformly distributed over a spherical shell of radius R. Find the electric field inside and outside the shell.', a:'Derivation'},
+      {n:'T7',  t:'Two charges +4 μC and −4 μC are placed 20 cm apart. Find the electric field and potential at the midpoint.', a:''},
+      {n:'T8',  t:'A 5 μF capacitor is charged to 300 V. It is then connected to another uncharged 10 μF capacitor. Find the common potential and energy lost.', a:''},
+    ],
+    assignment:[
+      {n:'A1', t:'State and prove Gauss\'s law. Apply it to find the field due to an infinitely long straight uniformly charged wire.', a:'Derivation'},
+      {n:'A2', t:'Two charges 3 μC and −5 μC are placed 20 cm apart. Find the point on the line joining them where the field is zero.', a:''},
+      {n:'A3', t:'A parallel plate capacitor has plates 30 cm × 30 cm, separated by 2 mm of mica (K = 6). A 100 V battery is connected. Find C, Q, E, and energy.', a:''},
+      {n:'A4', t:'Three capacitors (2, 3, 6 μF) are connected in series across 12 V. Find the charge on each and voltage across each.', a:''},
+      {n:'A5', t:'Find the equivalent capacitance of three capacitors (C₁ = 2 μF, C₂ = 3 μF, C₃ = 4 μF) connected: (a) in series, (b) in parallel.', a:''},
+    ]
+  },
+  {
+    id:'emag', title:'Electricity & Magnetism', color:'var(--ink)', ac:'#000',
+    tutorial:[
+      {n:'T1',  t:'A long straight solenoid (n = 1000 turns/m, i = 2 A, cross-section 4 cm²). Find B inside and the flux per unit length.', a:''},
+      {n:'T2',  t:'A circular loop (radius 0.1 m, resistance 2 Ω) moves at 0.5 m/s perpendicular to a uniform field B = 0.1 T. Find the induced EMF and current.', a:''},
+      {n:'T3',  t:'A rectangular coil (100 turns, 20 cm × 10 cm) rotates at 600 rpm in B = 0.5 T. Find the maximum EMF.', a:''},
+      {n:'T4',  t:'A long solenoid (radius R, n turns/m) carries current i. Using Ampere\'s law find B inside.', a:'Derivation'},
+      {n:'T5',  t:'Find the force between two parallel wires 1 m apart each carrying 1 A. Hence define the ampere.', a:'2×10⁻⁷ N/m'},
+      {n:'T6',  t:'A proton moves at 2×10⁶ m/s in B = 0.1 T perpendicular to the field. Find the radius of the circular path.', a:''},
+      {n:'T7',  t:'A toroid (N = 500 turns, mean radius 20 cm, cross section 2 cm²). Find the inductance.', a:''},
+    ],
+    assignment:[
+      {n:'A1', t:'State Biot-Savart law. Use it to find the magnetic field at the centre of a circular current loop of radius R carrying current I.', a:'Derivation'},
+      {n:'A2', t:'A proton is accelerated through 10 kV. It then enters a field B = 0.5 T perpendicular to its velocity. Find the radius of the circular path.', a:''},
+      {n:'A3', t:'Two parallel conductors (0.2 m apart, currents 10 A and 15 A in same direction) are 1 m long. Find the force of attraction.', a:''},
+      {n:'A4', t:'A rectangular coil of area 4×10⁻² m² and 100 turns is placed with its plane perpendicular to a field B = 0.5 T. The field reverses in 0.01 s. Find the average induced EMF.', a:'400 V'},
+      {n:'A5', t:'An AC circuit has R = 8 Ω, XL = 6 Ω. Find: impedance, phase angle, power factor. If source is 100 V, find current and power consumed.', a:''},
+    ]
+  },
+  {
+    id:'em', title:'Electromagnetism', color:'var(--ink)', ac:'#000',
+    tutorial:[
+      {n:'T1',  t:'Write Maxwell\'s equations in differential and integral form and explain the physical significance of each.', a:'Derivation'},
+      {n:'T2',  t:'Show that electromagnetic waves are transverse in nature using Maxwell\'s equations.', a:'Derivation'},
+      {n:'T3',  t:'Calculate the speed of electromagnetic waves in free space from Maxwell\'s equations.', a:'Derivation'},
+      {n:'T4',  t:'What is the Poynting vector? Derive the Poynting theorem and explain the energy density of electromagnetic waves.', a:'Derivation'},
+      {n:'T5',  t:'A plane EM wave in vacuum has E = 50 sin(ωt − kx) V/m. Find (a) B amplitude, (b) wave intensity, (c) radiation pressure.', a:''},
+      {n:'T6',  t:'Find the displacement current between the plates of a parallel plate capacitor (A = 100 cm², d = 1 cm, V = 100 sin(2π×10³t) V).', a:''},
+    ],
+    assignment:[
+      {n:'A1',  t:'State Maxwell\'s modification of Ampere\'s circuital law. What is displacement current and why was it introduced?', a:'Derivation'},
+      {n:'A2',  t:'Derive the wave equation for EM waves in free space and show that v = 1/√(μ₀ε₀).', a:'Derivation'},
+      {n:'A3',  t:'An EM wave in vacuum has E₀ = 100 V/m. Find B₀ and the average intensity of the wave.', a:''},
+      {n:'A4',  t:'A rectangular coil of area 4×10⁻² m² and 100 turns is placed with its plane perpendicular to a field B = 0.5 T. The field reverses in 0.01 s. Find the average induced EMF.', a:'400 V'},
+      {n:'A5',  t:'An AC circuit has R=8Ω, XL=6Ω. Find: impedance, phase angle, power factor. If source is 100V, find current and power consumed.', a:''},
+      {n:'A6',  t:'A solenoid (L = 6.3 μH) connected in series with R = 1.2 kΩ. (a) With 14 V battery, how long to reach 80% of equilibrium current? (b) Current at t = 0.1 s.', a:''},
+      {n:'A7',  t:"Prove that after time t the potential across an inductor in a series RL circuit is V_L = εe^(−Rt/L). At what time does V_L equal V_R such that i = i₀/2?", a:'t = (L/R)ln2'},
+      {n:'A8',  t:'A solenoid (1.3 m long, 2.6 cm diameter, current 18 A, B = 23 mT). Find the length of wire and the inductance.', a:''},
+      {n:'A9',  t:'What magnitude of uniform electric field has the same energy density as a 0.50 T magnetic field?', a:''},
+      {n:'A10', t:'Calculate magnitude of the Poynting vector and amplitudes of E and B at 10 cm from a radio station radiating 10⁵ W uniformly over a hemisphere.', a:''},
+      {n:'A11', t:'Using Poynting vector, calculate maximum E and B for sunlight if solar constant = 1.4 kW/m².', a:''},
+      {n:'A12', t:'Calculate the displacement current between square capacitor plates (side 1 cm) if dE/dt = 3×10¹² V/m·s.', a:''},
+      {n:'A13', t:'A parallel plate capacitor (20 μF). At what rate must potential difference change to produce displacement current of 1.5 A?', a:''},
+      {n:'A14', t:'Find displacement current for a capacitor (radius 5 cm) with dE/dt = 8.9×10¹¹ V/m·s.', a:'0.62 A'},
+      {n:'A15', t:'An observer is 1.8 m from an isotropic point source of 250 W. Calculate rms values of E and B.', a:'48.11 V/m · 1.61×10⁻⁷ T'},
+      {n:'A16', t:'A parallel plate capacitor (circular plates, radius 10 cm) has uniform displacement current of 20 A/m². Find (i) curl of magnetic flux density and (ii) rate of change of electric field.', a:''},
+      {n:'A17', t:'Calculate radiation pressure at earth and sun surfaces assuming solar constant = 2 cal/min/cm². Given: radius of sun = 7×10⁸ m, average earth-sun distance = 1.5×10¹¹ m.', a:''},
+      {n:'A18', t:'Max E at 10 m from isotropic source is 2 V/m. (a) Max B? (b) Average intensity? (c) Power of source?', a:''},
+      {n:'A19', t:'A microwave antenna emits EM waves (λ = 3 cm, max E = 2×10⁻⁴ V/m). Find (i) frequency (ii) max B (iii) Poynting vector.', a:''},
+      {n:'A20', t:'Sun delivers 10³ W/m² to earth. (a) Total power on roof 8×20 m. (b) Radiation pressure and force on roof (perfect absorber).', a:''},
+      {n:'A21', t:'A radio wave transmits 25 W/m². The flat surface is perpendicular to propagation. Calculate radiation pressure and max E and B.', a:''},
+      {n:'A22', t:'Circular plate capacitor (radius 20 cm) with uniform displacement current 20 A/m². Find (i) dE/dt (ii) displacement current density (iii) induced magnetic field.', a:''},
+      {n:'A23', t:'Calculate displacement current between capacitor plates (area 1.5×10⁻² m², dE/dt = 1.5×10¹² V/m·s). Also find displacement current density.', a:''},
+      {n:'A24', t:'In a Hall experiment: current 25 A through silver foil (0.1 mm thick, 3 m long). B = 1.4 Wb/m². Conductivity of silver = 6.8×10⁷ mho/m. Find Hall voltage and mobility of electrons.', a:''},
+      {n:'A25', t:'A circular coil (50 turns, diameter 1.2 m) carries 10 A. (a) Find B at a point along axis 90 cm from centre. (b) At what distance from centre is B equal to 1/8 of centre value?', a:''},
+      {n:'A26', t:'A copper strip (150 μm thick) in B = 0.65 T. Current = 23 A. Find (i) Hall voltage (ii) Hall coefficient (iii) Hall mobility. (n = 8.4×10²⁸/m³, ρ = 1.72×10⁻⁸ Ω·m)', a:''},
+      {n:'A27', t:'A toroid (1250 turns, inner radius 52 mm, outer radius 95 mm, thickness 13 mm). Calculate the inductance.', a:''},
+      {n:'A28', t:'Max E at 10 m from isotropic source is 2 V/m. Find max B, average intensity, and power of source.', a:''},
+      {n:'A29', t:'A microwave antenna emits EM waves (λ = 3 cm). Find frequency, max B if max E = 2×10⁻⁴ V/m, and the Poynting vector.', a:''},
+      {n:'A30', t:'Sun delivers 10³ W/m². Find (a) total power on 8×20 m roof, (b) radiation pressure and force on roof (perfect absorber).', a:''},
+      {n:'A31', t:'A radio wave transmits 25 W/m². The flat surface is perpendicular to propagation. Calculate radiation pressure and max E and B.', a:''},
+      {n:'A32', t:'Circular plate capacitor (radius 20 cm) with uniform displacement current 20 A/m². Find (i) dE/dt (ii) displacement current density (iii) induced magnetic field.', a:''},
+      {n:'A33', t:'Calculate displacement current between capacitor plates (area 1.5×10⁻² m², dE/dt = 1.5×10¹² V/m·s). Also find displacement current density.', a:''},
+    ]
+  },
+  {
+    id:'photon', title:'Photon & Matter Wave', color:'var(--ink)', ac:'#000',
+    tutorial:[
+      {n:'T1',  t:'Explain the physical significance of wave function ψ. Discuss and find the Eigen function of a particle in a one-dimensional box of infinite height.', a:'Derivation'},
+      {n:'T2',  t:'An electron moving in a wave has wave function ψ(x) = 2 sin 2x. Find the probability of the electron being found in the region x = 0.25 to x = 0.5 m.', a:''},
+      {n:'T3',  t:'Normalize the one-dimensional wave function: (i) ψ(x) = A sin(nπx/a) for 0 < x < a, and (ii) ψ = 0 outside.', a:'A = √(2/a)'},
+      {n:'T4',  t:'A particle moves in a one-dimensional infinite box. Find the probability of finding the particle within the range L/4 to 3L/4 at the centre when in the lowest energy state.', a:''},
+      {n:'T5',  t:'Prove that E = ℏω where the symbols carry their usual meaning.', a:'Derivation'},
+      {n:'T6',  t:'Derive the expression for Schrödinger time-independent and time-dependent wave equations.', a:'Derivation'},
+      {n:'T7',  t:'An electron is confined in an infinite potential box of width 0.1 nm. Calculate the ground state energy. How can this electron be put in the 3rd energy state?', a:''},
+      {n:'T8',  t:'Calculate the de Broglie wavelength of an electron having kinetic energy 10 keV.', a:''},
+      {n:'T9',  t:'An electron has de Broglie wavelength λ. Find the kinetic energy, phase velocity and group velocity.', a:''},
+      {n:'T10', t:'An electron is trapped in an infinite potential well of width a: V = 0 for 0 ≤ x ≤ a, V = ∞ outside. Prove that energy in the potential well is quantized using boundary conditions.', a:'Derivation'},
+    ],
+    assignment:[
+      {n:'A1',  t:'Calculate the wavelength associated with an electron subjected to a potential difference of 1.25 kV.', a:''},
+      {n:'A2',  t:'Find the energy in eV of a neutron whose de Broglie wavelength is 1 Å. (mass of neutron = 1.67×10⁻²⁷ kg)', a:''},
+      {n:'A3',  t:'What voltage must be applied to an electron microscope to produce electrons of wavelength 0.50 Å?', a:''},
+      {n:'A4',  t:'An electron is confined in an infinite height box of size 0.1 nm. Calculate the ground state energy. How can this electron be put to the third energy level?', a:''},
+      {n:'A5',  t:'The wave function of a particle in a box of length L is ψ(x) = √(2/L) sin(nπx/L). Calculate the probability of finding the particle in 0 to L/4.', a:''},
+      {n:'A6',  t:'Calculate the probability of transmission of an α particle through a rectangular barrier: barrier height V₀ = 2 MeV, particle energy E = 1 MeV, barrier width L = 1 fm, mass of α particle = 6.4×10⁻²⁷ g.', a:''},
+      {n:'A7',  t:'A beam of electrons (energy 3 eV each) is incident on a potential barrier of height 4 eV. Barrier width = 20 Å. Calculate the transmission coefficient.', a:''},
+      {n:'A8',  t:'A non-relativistic particle moves three times as fast as an electron. The ratio of de Broglie wavelengths (particle to electron) is 1.813×10⁻⁴. Calculate the mass of the particle.', a:''},
+      {n:'A9',  t:'Using the uncertainty principle, calculate the minimum uncertainty in velocity when an electron is confined to Δx = 1 Å. (m = 9.1×10⁻³¹ kg, h = 6.6×10⁻³⁴ J·s)', a:''},
+      {n:'A10', t:'An electron is confined in an infinite potential well of width a: V = 0 for 0 ≤ x ≤ a, V = ∞ outside. Find the Eigen functions ψₙ and energy Eigen values Eₙ.', a:'ψₙ = A sin(nπx/a) · Eₙ = n²h²/8ma²'},
+      {n:'A11', t:'Calculate the permitted energy levels of an electron in a one-dimensional potential well of width 0.2 nm.', a:''},
+    ]
+  },
+];
 
-// ── STATE ──────────────────────────────────────────────
-let currentTopic = 'all';
-let currentType = 'all';
-let currentStatus = 'all';
-let currentQId = null;
-let selectedType = 'exercise';
-let searchTimeout = null;
-
-const TOPICS = {
-  limits:                { label: 'Limits', cls: 'badge-lim', group: 'derivatives' },
-  higher_derivatives:    { label: 'Higher Order Derivatives', cls: 'badge-lim', group: 'derivatives' },
-  asymptotes:            { label: 'Asymptotes', cls: 'badge-lim', group: 'derivatives' },
-  pedal_equation:        { label: 'Pedal Equation', cls: 'badge-lim', group: 'derivatives' },
-  radius_curvature:      { label: 'Radius of Curvature', cls: 'badge-lim', group: 'derivatives' },
-  methods_integration:   { label: 'Methods of Integration', cls: 'badge-int', group: 'integration' },
-  definite_integral:     { label: 'Review of Definite Integral', cls: 'badge-int', group: 'integration' },
-  diff_integral_sign:    { label: 'Differentiation Under Integral Sign', cls: 'badge-int', group: 'integration' },
-  improper_integral:     { label: 'Improper Integral', cls: 'badge-int', group: 'integration' },
-  beta_gamma:            { label: 'Beta & Gamma Function', cls: 'badge-int', group: 'integration' },
-  area_curve:            { label: 'Area Under Curve', cls: 'badge-int', group: 'integration' },
-  arc_length:            { label: 'Arc Length', cls: 'badge-int', group: 'integration' },
-  surface_revolution:    { label: 'Area of Surface of Revolution', cls: 'badge-int', group: 'integration' },
-  volume_revolution:     { label: 'Volume of Solid of Revolution', cls: 'badge-int', group: 'integration' },
-  centroid_inertia:      { label: 'Centroid & Moment of Inertia', cls: 'badge-int', group: 'integration' },
-  homogeneous_ode:       { label: 'Homogeneous Differential Equation', cls: 'badge-ode', group: 'ode' },
-  bernoulli:             { label: "Bernoulli's Equation", cls: 'badge-ode', group: 'ode' },
-  first_higher_ode:      { label: 'First Order & Higher Order ODE', cls: 'badge-ode', group: 'ode' },
-  second_order_linear:   { label: 'Second Order Linear ODE', cls: 'badge-ode', group: 'ode' },
-  second_nonhomogeneous: { label: 'Second Order Non-Homogeneous ODE', cls: 'badge-ode', group: 'ode' },
-  application_ode:       { label: 'Application of Second Order ODE', cls: 'badge-ode', group: 'ode' },
-};
-
-const GROUPS = {
-  derivatives:  { label: 'Limits & Derivatives', dot: 'dot-lim' },
-  integration:  { label: 'Integration', dot: 'dot-int' },
-  ode:          { label: 'Differential Equations', dot: 'dot-ode' },
-};
-
-// ── TOAST ──────────────────────────────────────────────
-function toast(msg, type = '') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast show ' + type;
-  setTimeout(() => el.className = 'toast', 2800);
+// ── Helpers to classify question type ──────────────────────────
+function getQTag(q) {
+  const t = (q.a || '').toLowerCase();
+  const txt = q.t.toLowerCase();
+  if (t === 'derivation' || txt.startsWith('show that') || txt.startsWith('prove') || txt.startsWith('derive') || txt.startsWith('explain')) return 'DERIVATION';
+  if (!q.a || q.a === '' || q.a === 'See solution') return 'NUMERICAL';
+  return 'NUMERICAL';
 }
 
-// ── API CALLS ──────────────────────────────────────────
-async function apiFetch(path, opts = {}) {
-  const res = await fetch(API + path, {
-    headers: { 'Content-Type': 'application/json' },
-    ...opts,
+const tabState = {};
+TOPICS.forEach(t => { tabState[t.id] = 'tutorial'; });
+let activeCh = 'all';
+
+function totalCount(topic) { return topic.tutorial.length + topic.assignment.length; }
+
+function render(list) {
+  const el = document.getElementById('content');
+  if (!list.length) {
+    el.innerHTML = `<div class="empty">No problems match your search.</div>`;
+    return;
+  }
+  el.innerHTML = list.map((ch, ci) => {
+    const tab = tabState[ch.id] || 'tutorial';
+    const qs = tab === 'tutorial' ? ch.tutorial : ch.assignment;
+    const hasAssign = ch.assignment.length > 0;
+    return `
+    <div class="chapter-block" id="block-${ch.id}" style="animation-delay:${ci*0.04}s">
+      <div class="chapter-heading">
+        <span class="ch-num">${String(ci+1).padStart(2,'0')}</span>
+        <span class="ch-title">${ch.title}</span>
+        <span class="ch-count">${totalCount(ch)} problems</span>
+      </div>
+      <div class="tab-row">
+        <button class="tab-btn ${tab==='tutorial'?'active':''}" onclick="switchTab('${ch.id}','tutorial')">Tutorial</button>
+        ${hasAssign ? `<button class="tab-btn ${tab==='assignment'?'active':''}" onclick="switchTab('${ch.id}','assignment')">Assignment</button>` : ''}
+        <span class="tab-count">${qs.length} problems</span>
+      </div>
+      <div class="q-list">${buildQList(ch, tab)}</div>
+    </div>`;
+  }).join('');
+}
+
+function buildQList(ch, tab) {
+  const qs = tab === 'tutorial' ? ch.tutorial : ch.assignment;
+  if (!qs.length) return `<div class="empty">No questions in this section yet.</div>`;
+  return qs.map((q, qi) => {
+    const tag = getQTag(q);
+    const hasAns = q.a && q.a !== 'See solution' && q.a !== 'Derivation';
+    return `
+    <div class="q-row" onclick="openModal('${ch.id}','${tab}','${qi}')">
+      <div class="q-index">${q.n}</div>
+      <div class="q-body">
+        <div class="q-text">
+          <span class="q-type-tag">${tag}</span>${q.t}
+        </div>
+      </div>
+      <div class="q-tail">
+        ${hasAns
+          ? `<span class="ans-chip">${q.a}</span>`
+          : q.a === 'Derivation'
+            ? `<span class="ans-chip" style="color:var(--faint)!important">Proof</span>`
+            : `<span class="ans-chip" style="color:var(--faint)!important">—</span>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function switchTab(chId, newTab) {
+  if (tabState[chId] === newTab) return;
+  tabState[chId] = newTab;
+  const block = document.getElementById('block-' + chId);
+  if (!block) return;
+  const ch = TOPICS.find(c => c.id === chId);
+
+  block.querySelectorAll('.tab-btn').forEach(btn => {
+    const isTut = btn.textContent.trim() === 'Tutorial';
+    const active = (isTut && newTab === 'tutorial') || (!isTut && newTab === 'assignment');
+    btn.classList.toggle('active', active);
+    btn.style.background = '';
+    btn.style.color = '';
   });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+
+  const countEl = block.querySelector('.tab-count');
+  const qs = newTab === 'tutorial' ? ch.tutorial : ch.assignment;
+  if (countEl) countEl.textContent = qs.length + ' problems';
+
+  const dir = newTab === 'assignment' ? 'anim-right' : 'anim-left';
+  const qList = block.querySelector('.q-list');
+  qList.classList.remove('anim-right','anim-left');
+  void qList.offsetWidth;
+  qList.innerHTML = buildQList(ch, newTab);
+  qList.classList.add(dir);
 }
 
-// ── CONNECTION CHECK ───────────────────────────────────
-async function loadTopicCounts() {
-  try {
-    const all = await apiFetch('/api/questions');
-    Object.keys(TOPICS).forEach(key => {
-      const el = document.getElementById('cnt-' + key);
-      if (el) el.textContent = all.filter(q => q.topic === key).length;
-    });
-  } catch {}
-}
-
-async function checkConnection() {
-  try {
-    await apiFetch('/health');
-    document.getElementById('connStatus').textContent = 'connected';
-    document.querySelector('.online-dot').style.background = 'var(--accent3)';
-  } catch {
-    document.getElementById('connStatus').textContent = 'offline';
-    document.querySelector('.online-dot').style.background = 'var(--danger)';
+function applyFilters() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  let data = TOPICS;
+  if (activeCh !== 'all') data = data.filter(c => c.id === activeCh);
+  if (q) {
+    data = data.map(ch => ({
+      ...ch,
+      tutorial: ch.tutorial.filter(qq => qq.t.toLowerCase().includes(q) || qq.n.toLowerCase().includes(q)),
+      assignment: ch.assignment.filter(qq => qq.t.toLowerCase().includes(q) || qq.n.toLowerCase().includes(q)),
+    })).filter(ch => ch.tutorial.length || ch.assignment.length);
   }
+  render(data);
 }
 
-// ── STATS ──────────────────────────────────────────────
-async function loadStats() {
-  try {
-    const s = await apiFetch('/api/stats');
-    const total = parseInt(s.total);
-    const solved = parseInt(s.solved);
-    const unsolved = total - solved;
-    const pct = total ? Math.round(solved / total * 100) : 0;
-    document.getElementById('statTotal').textContent = total;
-    document.getElementById('statSolved').textContent = solved;
-    document.getElementById('statUnsolved').textContent = unsolved;
-    document.getElementById('statPct').textContent = pct + '% complete';
-    document.getElementById('progressFill').style.width = pct + '%';
-    document.getElementById('cnt-all').textContent = total;
-    // Update individual topic counts from questions list
-    loadTopicCounts();
-  } catch {}
+function filterCh(id, btn) {
+  activeCh = id;
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
 }
 
-// ── LOAD & RENDER ──────────────────────────────────────
-function escHtml(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-async function loadQuestions() {
-  const params = new URLSearchParams();
-  if (currentTopic !== 'all') params.set('topic', currentTopic);
-  if (currentType !== 'all') params.set('type', currentType);
-  if (currentStatus !== 'all') params.set('solved', currentStatus);
-  const search = document.getElementById('searchInput').value.trim();
-  if (search) params.set('search', search);
-
-  const list = document.getElementById('questionsList');
-  list.innerHTML = `
-    <div class="skeleton skeleton-card"></div>
-    <div class="skeleton skeleton-card"></div>
-    <div class="skeleton skeleton-card"></div>`;
-
-  try {
-    const questions = await apiFetch('/api/questions?' + params.toString());
-    if (!questions.length) {
-      list.innerHTML = `<div class="empty-state"><div class="icon">∑</div><h3>No questions here yet</h3><p>Add your first question using the button above.</p></div>`;
-      return;
-    }
-    // Group questions by topic + type
-    const groups = {};
-    questions.forEach(q => {
-      const key = q.topic + '__' + q.type;
-      if (!groups[key]) groups[key] = { topic: q.topic, type: q.type, questions: [] };
-      groups[key].questions.push(q);
-    });
-
-    list.innerHTML = Object.values(groups).map(g => {
-      const t = TOPICS[g.topic] || { label: g.topic, cls: 'badge-lim' };
-      const typeCls = g.type === 'example' ? 'badge-example' : 'badge-exercise';
-      const typeLabel = g.type === 'example' ? '📘 Examples' : '✏️ Exercises';
-      const solvedCount = g.questions.filter(q => q.solved).length;
-      const total = g.questions.length;
-
-      const rows = g.questions.map((q, i) => `
-        <div class="q-row ${q.solved ? 'q-row-solved' : ''}" onclick="openViewModal('${q.id}')">
-          <div class="q-row-num">${i + 1}</div>
-          <div class="q-row-text">${escHtml(q.question)}</div>
-          <div class="q-row-status ${q.solved ? 'chip-solved' : 'chip-unsolved'}">${q.solved ? '✓' : '○'}</div>
-        </div>`).join('');
-
-      return `<div class="group-card">
-        <div class="group-header">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <span class="topic-badge ${t.cls}">${t.label}</span>
-            <span class="topic-badge ${typeCls}">${typeLabel}</span>
-          </div>
-          <span class="group-progress">${solvedCount}/${total} solved</span>
-        </div>
-        <div class="q-rows">${rows}</div>
-      </div>`;
-    }).join('');
-  } catch (err) {
-    list.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><h3>Could not load questions</h3><p>Check that your backend is running.</p></div>`;
-  }
-}
-
-function refresh() { loadStats(); loadQuestions(); }
-
-// ── FILTERS ────────────────────────────────────────────
-function setTopic(t, el) {
-  currentTopic = t;
-  document.querySelectorAll('[id^="topicBtn-"]').forEach(e => e.classList.remove('active'));
-  el.classList.add('active'); loadQuestions();
-}
-function setType(t, el) {
-  currentType = t;
-  document.querySelectorAll('[id^="typeBtn-"]').forEach(e => e.classList.remove('active'));
-  el.classList.add('active'); loadQuestions();
-}
-function setStatus(s, el) {
-  currentStatus = s;
-  document.querySelectorAll('[id^="statusBtn-"]').forEach(e => e.classList.remove('active'));
-  el.classList.add('active'); loadQuestions();
-}
-function debounceSearch() {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(loadQuestions, 350);
-}
-
-// ── ADD QUESTION ───────────────────────────────────────
-function selectType(t) {
-  selectedType = t;
-  document.getElementById('typeExampleBox').classList.toggle('active', t === 'example');
-  document.getElementById('typeExerciseBox').classList.toggle('active', t === 'exercise');
-}
-function openAddModal() {
-  document.getElementById('newQuestion').value = '';
-  document.getElementById('newSolution').value = '';
-  document.getElementById('newSubtopic').value = '';
-  document.getElementById('newPage').value = '';
-  selectType('exercise');
-  document.getElementById('addModal').classList.add('open');
-  setTimeout(() => document.getElementById('newQuestion').focus(), 100);
-}
-function closeAddModal() { document.getElementById('addModal').classList.remove('open'); }
-
-async function addQuestion() {
-  const q = document.getElementById('newQuestion').value.trim();
-  if (!q) { toast('Please enter a question.', 'error'); return; }
-  const btn = document.getElementById('addBtn');
-  btn.disabled = true; btn.textContent = 'Saving...';
-  try {
-    await apiFetch('/api/questions', {
-      method: 'POST',
-      body: JSON.stringify({
-        type: selectedType,
-        topic: document.getElementById('newTopic').value,
-        subtopic: document.getElementById('newSubtopic').value.trim(),
-        page: document.getElementById('newPage').value.trim(),
-        question: q,
-        solution: document.getElementById('newSolution').value.trim(),
-      }),
-    });
-    toast('Question added!', 'success');
-    closeAddModal();
-    refresh();
-  } catch (err) {
-    toast('Failed to add question.', 'error');
-  } finally {
-    btn.disabled = false; btn.textContent = 'Add Question';
-  }
-}
-
-// ── VIEW MODAL ─────────────────────────────────────────
-async function openViewModal(id) {
-  currentQId = id;
-  document.getElementById('viewModal').classList.add('open');
-  document.getElementById('viewContent').innerHTML = `<div style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:0.85rem">Loading...</div>`;
-
-  try {
-    const q = await apiFetch('/api/questions/' + id);
-    const t = TOPICS[q.topic];
-    const typeCls = q.type === 'example' ? 'badge-example' : 'badge-exercise';
-    const typeLabel = q.type === 'example' ? '📘 Example' : '✏️ Exercise';
-
-    document.getElementById('viewContent').innerHTML = `
-      <div class="view-meta">
-        <span class="topic-badge ${t.cls}">${t.label}</span>
-        <span class="topic-badge ${typeCls}">${typeLabel}</span>
-        ${q.subtopic ? `<span class="subtopic-text">${escHtml(q.subtopic)}</span>` : ''}
-        ${q.page ? `<span class="q-num">Page ${escHtml(q.page)}</span>` : ''}
-      </div>
-
-      <div class="section-label">Question</div>
-      <div class="view-question">${escHtml(q.question)}</div>
-
-      <div style="margin-top:20px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <div class="section-label" style="margin:0">Solution</div>
-          <button class="btn btn-ghost btn-sm" onclick="toggleEditSolution()">✎ Edit</button>
-        </div>
-        <div id="solutionDisplay">
-          ${q.solution
-            ? (q.solution.includes('<div') || q.solution.includes('<span')
-                ? `<div class="solution-box" style="white-space:normal;font-family:inherit"><div class="ai-badge">🤖 Wolfram + Grok AI · Step-by-step</div>${q.solution}</div>`
-                : `<div class="solution-box">${escHtml(q.solution)}</div>`)
-            : `<div class="no-solution">No solution yet — click Edit to add one.</div>`}
-        </div>
-        <div id="solutionEditor" style="display:none">
-          <textarea class="form-textarea" id="solutionInput" style="min-height:140px;font-family:'IBM Plex Mono',monospace;font-size:0.85rem">${escHtml(q.solution||'')}</textarea>
-          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
-            <button class="btn btn-ghost btn-sm" onclick="cancelEditSolution()">Cancel</button>
-            <button class="btn btn-primary btn-sm" id="saveSolBtn" onclick="saveSolution()">Save Solution</button>
-          </div>
-        </div>
-      </div>
-    `;
-
-    const btn = document.getElementById('solveBtn');
-    btn.textContent = q.solved ? 'Mark Unsolved' : 'Mark as Solved';
-    btn.className = 'btn btn-sm ' + (q.solved ? 'btn-ghost' : 'btn-green');
-  } catch {
-    document.getElementById('viewContent').innerHTML = `<div style="color:var(--danger)">Failed to load question.</div>`;
-  }
-}
-
-function closeViewModal() {
-  document.getElementById('viewModal').classList.remove('open');
-  currentQId = null;
-  loadQuestions();
-}
-
-function toggleEditSolution() {
-  document.getElementById('solutionDisplay').style.display = 'none';
-  document.getElementById('solutionEditor').style.display = 'block';
-  document.getElementById('solutionInput').focus();
-}
-function cancelEditSolution() {
-  document.getElementById('solutionDisplay').style.display = 'block';
-  document.getElementById('solutionEditor').style.display = 'none';
-}
-async function saveSolution() {
-  const sol = document.getElementById('solutionInput').value.trim();
-  const btn = document.getElementById('saveSolBtn');
-  btn.disabled = true; btn.textContent = 'Saving...';
-  try {
-    await apiFetch('/api/questions/' + currentQId + '/solution', {
-      method: 'PATCH',
-      body: JSON.stringify({ solution: sol }),
-    });
-    document.getElementById('solutionDisplay').innerHTML = sol
-      ? `<div class="solution-box">${escHtml(sol)}</div>`
-      : `<div class="no-solution">No solution yet — click Edit to add one.</div>`;
-    document.getElementById('solutionDisplay').style.display = 'block';
-    document.getElementById('solutionEditor').style.display = 'none';
-    toast('Solution saved!', 'success');
-  } catch {
-    toast('Failed to save solution.', 'error');
-  } finally {
-    btn.disabled = false; btn.textContent = 'Save Solution';
-  }
-}
-
-async function toggleSolved() {
+function openModal(chId, tab, idx) {
+  const ch = TOPICS.find(c => c.id === chId);
+  const qs = tab === 'tutorial' ? ch.tutorial : ch.assignment;
+  const q = qs[parseInt(idx)];
+  document.getElementById('mTag').textContent = ch.title + ' · ' + (tab === 'tutorial' ? 'Tutorial' : 'Assignment') + ' · ' + q.n;
+  document.getElementById('mChapter').textContent = q.t.substring(0,72) + (q.t.length > 72 ? '…' : '');
+  document.getElementById('mQuestion').textContent = q.t;
+  const ansEl = document.getElementById('mAnswer');
+  if (q.a && q.a !== 'See solution') {
+    ansEl.innerHTML = `<div class="m-answer">
+      <div class="al">Answer</div>
+      <div class="av">${q.a}</div>
+    </div>`;
+  } else { ansEl.innerHTML = ''; }
+  document.getElementById('overlay').classList.add('open');
+  currentQuestion = { id:`${chId}-${tab}-${idx}`, text:q.t, answer:q.a, chapter:ch.title, num:q.n, topic:chId, tab };
+  const slot = document.getElementById('aiSlot');
+  slot.className = 'ai-slot';
+  slot.innerHTML = `<div class="ai-slot-placeholder">AI step-by-step solver — click <em>Solve with AI</em> to begin</div>`;
+  document.getElementById('aiStageBars').style.display = 'none';
   const btn = document.getElementById('solveBtn');
-  const isSolved = btn.textContent === 'Mark as Solved';
-  try {
-    await apiFetch('/api/questions/' + currentQId + '/solved', {
-      method: 'PATCH',
-      body: JSON.stringify({ solved: isSolved }),
-    });
-    btn.textContent = isSolved ? 'Mark Unsolved' : 'Mark as Solved';
-    btn.className = 'btn btn-sm ' + (isSolved ? 'btn-ghost' : 'btn-green');
-    loadStats();
-    toast(isSolved ? 'Marked as solved!' : 'Marked as unsolved.', 'success');
-  } catch { toast('Failed to update.', 'error'); }
+  if (btn) { btn.disabled = false; btn.textContent = '⚡ Solve with AI'; }
 }
 
-async function deleteCurrentQ() {
-  if (!confirm('Delete this question? This cannot be undone.')) return;
-  try {
-    await apiFetch('/api/questions/' + currentQId, { method: 'DELETE' });
-    toast('Question deleted.', 'success');
-    closeViewModal();
-  } catch { toast('Failed to delete.', 'error'); }
+function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+
+let sidebarOpen = true;
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('closed', !sidebarOpen);
+  document.getElementById('mainArea').classList.toggle('wide', !sidebarOpen);
 }
 
-// Close modals on overlay click
-document.querySelectorAll('.modal-overlay').forEach(o => {
-  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+document.getElementById('overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
 });
 
-// ── WOLFRAM + GROK SOLVER ─────────────────────────────
-function renderSolution(solution, isHtml) {
-  if (isHtml && solution.includes('<')) {
-    return `<div class="solution-box" style="white-space:normal;font-family:inherit">
-      <div class="ai-badge">🤖 Wolfram + Grok AI · Step-by-step</div>
-      ${solution}
+// ═══════════════════════════════════════════════════════════
+// AI SOLVER
+// ═══════════════════════════════════════════════════════════
+const BACKEND_URL = 'https://physics-backend-3xna.onrender.com';
+let currentQuestion = null;
+const sessionCache = {};
+
+function setStage(name, state) {
+  const pill = document.getElementById('pill-' + name);
+  if (!pill) return;
+  pill.classList.remove('active','done','error');
+  if (state) pill.classList.add(state);
+  const dot = pill.querySelector('.ai-stage-dot');
+  if (dot) dot.classList.toggle('spin', state === 'active');
+}
+
+function setSlotLoading(msg, sub = '') {
+  const slot = document.getElementById('aiSlot');
+  slot.className = 'ai-slot loading';
+  const subHtml = sub ? `<div style="font-family:var(--font-mono);font-size:0.62rem;color:var(--faint);margin-top:6px;">${sub}</div>` : '';
+  slot.innerHTML = `<div class="ai-progress-text">${msg}</div>${subHtml}`;
+}
+
+function setSlotResult(html, modelUsed, fromCache = false) {
+  const slot = document.getElementById('aiSlot');
+  slot.className = 'ai-slot has-result';
+  const cacheTag = fromCache ? ` · cached` : '';
+  slot.innerHTML = `
+    <div class="ai-solution">
+      <div class="sol-header">
+        <span class="sol-header-title">Explanation</span>
+        <span class="ai-model-badge">${modelUsed}${cacheTag}</span>
+      </div>
+      <div class="sol-body">${html}</div>
     </div>`;
-  }
-  return `<div class="solution-box">${escHtml(solution)}</div>`;
 }
 
-async function solveWithWolfram() {
-  if (!currentQId) return;
-  const btn = document.getElementById('wolframBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>Solving...</span>';
-  if (!document.getElementById('spinStyle')) {
-    const s = document.createElement('style');
-    s.id = 'spinStyle';
-    s.textContent = '@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }';
-    document.head.appendChild(s);
+function setSlotError(msg) {
+  const slot = document.getElementById('aiSlot');
+  slot.className = 'ai-slot';
+  slot.innerHTML = `<div class="ai-error">⚠ ${msg}</div>`;
+}
+
+async function solveWithAI() {
+  if (!currentQuestion) return;
+  const btn = document.getElementById('solveBtn');
+  btn.disabled = true; btn.textContent = 'Solving…';
+  document.getElementById('aiStageBars').style.display = 'flex';
+  setStage('solve', 'active'); setStage('format', '');
+  const qid = currentQuestion.id;
+
+  if (sessionCache[qid]) {
+    const c = sessionCache[qid];
+    setStage('solve','done'); setStage('format','done');
+    setSlotResult(c.solution, c.modelUsed, true);
+    btn.disabled = false; btn.textContent = '⚡ Solve with AI';
+    return;
   }
+
+  setSlotLoading('Checking for cached solution…');
   try {
-    const result = await apiFetch('/api/wolfram-solve/' + currentQId, { method: 'POST' });
-    const display = document.getElementById('solutionDisplay');
-    if (display) {
-      display.innerHTML = renderSolution(result.solution, result.isHtml);
-      display.style.display = 'block';
+    const checkRes = await fetch(`${BACKEND_URL}/api/solution/${encodeURIComponent(qid)}`);
+    if (checkRes.ok) {
+      const checkData = await checkRes.json();
+      if (checkData.solution) {
+        sessionCache[qid] = { solution: checkData.solution, modelUsed: checkData.modelUsed };
+        setStage('solve','done'); setStage('format','done');
+        setSlotResult(checkData.solution, checkData.modelUsed, true);
+        btn.disabled = false; btn.textContent = '⚡ Solve with AI';
+        return;
+      }
     }
-    const editor = document.getElementById('solutionEditor');
-    if (editor) editor.style.display = 'none';
-    const input = document.getElementById('solutionInput');
-    if (input) input.value = result.solution;
-    const solveBtn = document.getElementById('solveBtn');
-    if (solveBtn) { solveBtn.textContent = 'Mark Unsolved'; solveBtn.className = 'btn btn-sm btn-ghost'; }
-    loadStats();
-    toast('✓ Solved & refined by Grok!', 'success');
-  } catch (err) {
-    let msg = err.message || 'Could not solve this question.';
-    try { const p = JSON.parse(msg); msg = p.error || msg; } catch {}
-    toast('⚠ ' + (msg.length > 90 ? msg.slice(0, 90) + '…' : msg), 'error');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '🧮 Solve with Wolfram';
+    setSlotLoading('Stage 1 · Solving with reasoning model…', 'Qwen 3 32B → Gemini 2.5 Flash');
+    setStage('solve', 'active');
+    const solveRes = await fetch(`${BACKEND_URL}/api/solve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ questionId: qid, topic: currentQuestion.topic, tab: currentQuestion.tab, question: currentQuestion.text }),
+    });
+    if (!solveRes.ok) {
+      const err = await solveRes.json().catch(() => ({ error: solveRes.statusText }));
+      throw new Error(err.error || `Server error ${solveRes.status}`);
+    }
+    const data = await solveRes.json();
+    setStage('solve','done'); setStage('format','done');
+    sessionCache[qid] = { solution: data.solution, modelUsed: data.modelUsed };
+    setSlotResult(data.solution, data.modelUsed, data.cached);
+  } catch (e) {
+    setStage('solve','error'); setStage('format','error');
+    setSlotError(`${e.message}. Make sure the backend is running.`);
   }
+  btn.disabled = false; btn.textContent = '⚡ Solve with AI';
 }
 
-// ── INIT ───────────────────────────────────────────────
-checkConnection();
-refresh();
-setInterval(checkConnection, 30000);
+render(TOPICS);
 </script>
 </body>
+</html>
